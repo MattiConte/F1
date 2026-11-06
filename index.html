@@ -239,7 +239,7 @@ body.cl label:has(#sp){display:none}
 <select id="sp"><option value="2500">Molto lento</option><option value="1100">Lento</option><option value="450" selected>Medio</option><option value="100">Veloce</option></select>
 <button id="bl">⏩ Finisci giro</button><button id="bf">⏭ Fine gara</button><button id="bg">☰ Menu</button><button id="bgar">🔧 Garage</button><button id="bmk">🔁 Mercato</button><button id="bs">🔊 Suoni</button><label>Gare <input type="number" id="ng" value="1" min="1" max="24" style="width:54px"></label><label class="mut"><input type="checkbox" id="qf" checked> Qualifiche Q1-Q2-Q3</label><label>Giocatori umani <select id="nh"><option>0</option><option selected>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option><option>7</option><option>8</option><option>9</option><option>10</option></select></label></div>
 <div class="stage">
-<div class="c"><h2>Pista <span class="mut">(verde = zona DRS · clicca un'auto per i dettagli)</span><span class="mt"><button id="b3">🧊 3D</button> <button id="bcam">🎥 Camera</button></span></h2><div class="mapw"><div id="mhud"></div><svg id="map" viewBox="0 0 900 430" style="width:100%;height:auto;max-height:46vh;display:block;margin:0 auto"></svg><div id="v3" hidden><canvas id="c3"></canvas><div id="t3"></div><div id="sc3">🚨 SAFETY CAR</div></div></div><div id="mstrip"></div><div id="minfo" class="mut" style="margin-top:8px;min-height:18px">Clicca un'auto per vederne i dettagli.</div></div>
+<div class="c"><h2>Pista <span class="mut">(verde = zona DRS · clicca un'auto per i dettagli)</span><span class="mt"><button id="b3">🧊 3D</button> <button id="bcam">🎥 Camera</button></span></h2><div class="mapw"><div id="mhud"></div><svg id="map" viewBox="0 0 900 430" style="width:100%;height:auto;max-height:46vh;display:block;margin:0 auto"></svg><div id="v3" hidden><canvas id="c3"></canvas><div id="t3"></div><div id="sc3">🚨 SAFETY CAR</div></div></div><div id="mstrip"></div><div id="minfo" class="mut" style="margin-top:8px;min-height:18px">Clicca un'auto per vederne i dettagli.</div><div id="handbox" hidden></div></div>
 <div class="c" id="turn" hidden><div class="shh" id="shh">⌄ RIDUCI / ESPANDI</div><h2>🎮 <span id="who">Tocca a G1</span> <span class="mut">strategia, carta e box, poi conferma</span></h2><div id="tp"></div><button class="p" id="bc">✔ Conferma turno</button></div>
 </div>
 <div class="c" id="champ" hidden><h2>🏆 Campionato</h2><div id="ch"></div><button class="p" id="nr" hidden>▶ Prossima gara</button></div>
@@ -1640,4 +1640,17 @@ let pref="1";try{pref=localStorage.getItem("f1_3d")||"1"}catch(e){}
 if(pref==="1")V.set(true);
 return V})();
 
-</script></body></html>
+</script><style>
+@media (min-width:1000px){
+ body:not(.mob) .stage>.c:first-child{position:sticky;top:6px;align-self:start}
+ body:not(.mob) #turn:not([hidden]){position:sticky;top:6px;align-self:start;zoom:.9;max-height:calc((100vh - 12px)/.9);overflow:auto;overscroll-behavior:contain}
+ body:not(.mob) #turn:not([hidden]) #bc{position:sticky;bottom:0;width:100%;margin-top:6px;z-index:3}
+ #handbox{margin-top:8px;padding-top:8px;border-top:1px solid var(--bd)}
+ #handbox .hand{margin:0}
+ #handbox .hcs{max-height:32vh;overflow:auto}
+}
+</style><script>(function(){var tp=document.getElementById("tp"),turn=document.getElementById("turn"),hb=document.getElementById("handbox");
+if(!tp||!turn||!hb||document.body.classList.contains("mob"))return;
+new MutationObserver(function(r){if(!r.some(function(x){return x.addedNodes.length}))return;var h=tp.querySelector(".hand");hb.textContent="";if(h){hb.appendChild(h);hb.hidden=false}else hb.hidden=true}).observe(tp,{childList:true});
+new MutationObserver(function(){if(turn.hidden){hb.textContent="";hb.hidden=true}else{var st=document.querySelector(".stage");if(st&&window.innerWidth>=1000)window.scrollTo({top:st.getBoundingClientRect().top+window.scrollY-6})}}).observe(turn,{attributes:true,attributeFilter:["hidden"]});
+})();</script></body></html>
