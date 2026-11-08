@@ -271,7 +271,7 @@ const DRV=[["Norris",94,0],["Piastri",92,0],["Russell",92,1],["Antonelli",89,1],
 const BASE_MIN=.5,BASE_MAX=5,BASE_FROM=80,BASE_K=.2,baseStep=av=>Math.min(BASE_MAX,Math.max(BASE_MIN,Math.round((1+(av-BASE_FROM)*BASE_K)*2)/2));   // passo base: 1 casella a media 80, +0.2 per ogni punto, a mezze caselle, min 0.5 · max 5
 const TY={S:[6,4,4,-4,-14,-24,-34,-44,-54,-64],M:[5,4,4,4,1,-4,-9,-14,-19,-24],H:[4,4,4,4,4,4,0,-6,-12,-18]};   // bonus/malus per giro di vita della gomma (1°…10° giro). S: +6 poi +4, dura 3 giri · M: +5 poi +4, dura 4 giri (5° giro +1) · H: +4 costante, dura 6 giri
 // MAZZO DA 300 CARTE: a ogni gara se ne pescano ~190 (10 giocatori × (1 + 9 giri × 2)), quindi ogni gara usa un sottoinsieme diverso del mazzo
-const CARDS={"Sorpasso Azzardato":37,"Cambio di Traiettoria":38,"Track Limits":22,"Errore":14,"Talento Naturale":22,"Degrado Gomme Extra":14,"Fiducia":5,"Problemi Meccanici":3,"Difesa Impenetrabile":10,"Safety Car":1,"Incidente":4,"Hammer Time":15,"Box Perfetto":23,"Gestione Gomme":23,"Spionaggio":23,"Aria Sporca":14,"Ricorso":14,"Virtual Safety Car":1,"Bandiera Rossa":1,"Calo di Potenza":8,"Sosta Lenta":5,"DRS Guasto":5};
+const CARDS={"Sorpasso Azzardato":37,"Cambio di Traiettoria":38,"Track Limits":22,"Errore":14,"Talento Naturale":22,"Degrado Gomme Extra":14,"Fiducia":5,"Problemi Meccanici":3,"Difesa Impenetrabile":10,"Safety Car":1,"Incidente":2,"Hammer Time":15,"Box Perfetto":23,"Gestione Gomme":23,"Spionaggio":23,"Aria Sporca":14,"Ricorso":14,"Virtual Safety Car":1,"Bandiera Rossa":1,"Calo di Potenza":8,"Sosta Lenta":5,"DRS Guasto":5};
 const COL=["#ff8000","#27f4d2","#5b8def","#e8002d","#64c4ff","#8fa6ff","#2fb584","#b6babd","#6fe06f","#ff87bc"];
 const lapOf=d=>Math.max(1,Math.floor(d/40)+1),cellOf=d=>((Math.floor(d)%40)+40)%40;
 const pref=c=>c%8<3?-1:(((c>>3)+(c%8>5?1:0))%3),drs=c=>c<=5||(c>=20&&c<=26);
@@ -279,7 +279,7 @@ const ag=c=>Math.min(10,Math.max(1,Math.floor(lapOf(c.dist)-c.ts+1+c.wear-(c.pit
 const tyb=c=>`<span class="ty ${c.tyre}">${c.tyre}</span> giro ${ag(c)}/10<i class="wb"><u style="width:${ag(c)*10}%"></u></i><b>${fs(md(c))}</b>${c.gg>0?` <span class="ty" style="background:#00e5ff;width:auto;padding:0 5px">🧊${c.gg}</span>`:""}`;
 let S,timer=null;const NH=()=>+$("nh").value,isH=i=>!S.ff&&i<NH();
 const CAM="Cambio di Traiettoria";let SPT=null,SCF=5,DS={e:0,o:0},QUIET=0,AUTO=true,SND=true,CMR=MOBILE?2.2:0,DQ=[],DB=0,AC=null;const FXH=[];
-const CD={"Sorpasso Azzardato":["🎯","Attacca chi è a 1 casella davanti: dado pari = sorpasso, dispari = fallisce (tu −1 casella, lui +1)"],"Cambio di Traiettoria":["↩️","Se sei stato superato, torna davanti"],"Track Limits":["🚧","Un avversario perde 6 caselle"],"Errore":["💥","Un avversario perde 10 caselle"],"Talento Naturale":["⭐","+3 overall fino a fine gara"],"Degrado Gomme Extra":["🛞","Un avversario: +1 giro di usura"],"Fiducia":["💪","+1 passo fisso per tutta la gara"],"Problemi Meccanici":["🔧","Un avversario deve fermarsi ai box"],"Difesa Impenetrabile":["🛡️","Nessuno ti supera in questo round"],"Safety Car":["🚨","Safety Car in pista"],"Incidente":["💣","Incidente: piloti eliminati a caso"],"Hammer Time":["🔨","+2 passi per un giro (40 caselle)"],"Box Perfetto":["⏱️","La sosta ai box dura 1 solo round (non con SC/VSC)"],"Gestione Gomme":["🧊","Per 1 giro la gomma non si consuma"],"Spionaggio":["🕵️","Vedi le carte di un avversario a tua scelta"],"Aria Sporca":["🌫️","Chi ti segue (a meno di 5 caselle) fino a fine giro non prende la scia e fa −1 passo"],"Ricorso":["⚖️","Scatta da sola: annulla una carta avversaria che ti colpisce"],"Virtual Safety Car":["🟨","Tutti avanzano di 0,5 caselle per 2 round, come la Safety Car"],"Bandiera Rossa":["🔴","Gara sospesa: si riparte dalla griglia, giri e posizioni mantenuti, gomme nuove gratis (non al 1° giro)"],"Calo di Potenza":["📉","Pilota a caso (anche il tuo compagno): −1 passo per un giro"],"Sosta Lenta":["🐌","Pilota a caso (anche il tuo compagno): la prossima sosta dura 1 round in più"],"DRS Guasto":["🚫","Pilota a caso (anche il tuo compagno): niente DRS per un giro"]};
+const CD={"Sorpasso Azzardato":["🎯","Attacca chi è a 1 casella davanti: dado pari = sorpasso, dispari = fallisce (tu −1 casella, lui +1)"],"Cambio di Traiettoria":["↩️","Se sei stato superato, torna davanti"],"Track Limits":["🚧","Un avversario perde 6 caselle"],"Errore":["💥","Un avversario perde 10 caselle"],"Talento Naturale":["⭐","+3 overall fino a fine gara"],"Degrado Gomme Extra":["🛞","Un avversario: −1 passo per un giro"],"Fiducia":["💪","+1 passo fisso per tutta la gara"],"Problemi Meccanici":["🔧","Un avversario deve fermarsi ai box"],"Difesa Impenetrabile":["🛡️","Nessuno ti supera in questo round"],"Safety Car":["🚨","Safety Car in pista"],"Incidente":["💣","Incidente: piloti eliminati a caso"],"Hammer Time":["🔨","+2 passi per un giro (40 caselle)"],"Box Perfetto":["⏱️","La sosta ai box dura 1 solo round (non con SC/VSC)"],"Gestione Gomme":["🧊","Per 1 giro la gomma non si consuma"],"Spionaggio":["🕵️","Vedi le carte di un avversario a tua scelta"],"Aria Sporca":["🌫️","Chi ti segue (a meno di 5 caselle) fino a fine giro non prende la scia e fa −1 passo"],"Ricorso":["⚖️","Scatta da sola: annulla una carta avversaria che ti colpisce"],"Virtual Safety Car":["🟨","Tutti avanzano di 0,5 caselle per 2 round, come la Safety Car"],"Bandiera Rossa":["🔴","Gara sospesa: si riparte dalla griglia, giri e posizioni mantenuti, gomme nuove gratis (non al 1° giro)"],"Calo di Potenza":["📉","Pilota a caso (anche il tuo compagno): −1 passo per un giro"],"Sosta Lenta":["🐌","Pilota a caso (anche il tuo compagno): la prossima sosta dura 1 round in più"],"DRS Guasto":["🚫","Pilota a caso (anche il tuo compagno): niente DRS per un giro"]};
 const FR={1:"rotateX(0deg) rotateY(0deg)",6:"rotateY(180deg)",2:"rotateY(-90deg)",5:"rotateY(90deg)",3:"rotateX(-90deg)",4:"rotateX(90deg)"};
 const TR={cx:450,cy:215,a:215,r:120},PER=4*TR.a+2*Math.PI*TR.r,M={race:null,els:{},first:0};
 const fx=(c,k,m)=>{if(!c||c.pi>=NH()||S.ff||!S.fx)return;if(NET.host&&NET.started)NET.evq.push({f:1,k,m,code:c.code,pi:c.pi});if(mine(c.pi))S.fx.push({k,m,code:c.code})};
@@ -417,6 +417,8 @@ function setPlan(c,k,t0){if(k==="L"){c.pl=[t0||"M"];c.pls=[]}else{const two=k===
 function cpuMode(c,a,g,L){if(L>=10||(c.si<c.pl.length-1&&L>=c.pls[c.si]))return 1;return a&&g<3&&Math.random()<.45?1:(Math.floor(L-c.ts+1+c.wear)>=7&&Math.random()<.4?-1:0)}
 function pitNow(c){const L=lapOf(c.dist);if(400-c.dist<=40)return 0;const av=(c.ovr+c.tov)/2,b=baseStep(av);
  return b+TY[c.tyre][Math.min(10,Math.max(1,L-c.ts+1+c.wear))-1]<=1}
+// rimbalzo: chi è lontano dal leader guadagna passo (soglie in CFG.RB). order=ordine del round (usa sd), senza order usa la posizione attuale
+function rbBonus(c,order){const k=order?"sd":"dist";let mx=-1e9;for(const o of (order||live()))if(!o.ret&&!o.fin&&o[k]>mx)mx=o[k];const g=mx-c[k];let b=0;for(const[th,v]of CFG.RB)if(g>=th)b=v;return b}
 function tyreFor(c){const r=11-lapOf(c.dist);return r<=3?"S":r<=5?"M":Math.random()<.5?"H":"M"}
 function mv(c,order){
  const L=lapOf(c.dist);
@@ -434,10 +436,10 @@ function mv(c,order){
  if(0){}
  else if(S.sc){if(S.vsc){s=CFG.VSC_STEP;t.push("Virtual Safety Car, passo fisso")}else{s=(order.find(x=>!(x.pit>0))||order[0])===c?1:SCF;t.push("Safety Car, passo fisso")}}
  else{const av=(c.ovr+c.tov)/2,b=baseStep(av),ty=TY[c.tyre][Math.min(10,Math.max(1,Math.floor(L-c.ts+1+c.wear)))-1]-(c.tp||0);
-   const sc=a&&g<5?(a.aS==lapOf(a.sd!=null?a.sd:a.dist)?-1:(a.lane==c.lane?1:0)):0,el=drs(cell)&&a&&g<=7&&!(c.dG>0),dr=el?2:0,pp=pf==c.lane?1:0,mo=c.lm||0,hm=c.hT>0?2:0,pw=c.pL>0?-1:0;let jd=0;
+   const sc=a&&g<5?(a.aS==lapOf(a.sd!=null?a.sd:a.dist)?-1:(a.lane==c.lane?1:0)):0,el=drs(cell)&&a&&g<=7&&!(c.dG>0),dr=el?2:0,pp=pf==c.lane?1:0,mo=c.lm||0,hm=c.hT>0?2:0,pw=c.pL>0?-1:0,rb=rbBonus(c,order);let jd=0;
   if(c.jump==L&&!c.jdone){jd=-5;c.jdone=1}
-  s=Math.max(.5,b+ty+sc+dr+pp+mo+c.fid+c.ex+jd+hm+pw);
-  t.push(`base ${b}`,`gomma ${c.tyre} ${ty>=0?"+":""}${ty}`);if(mo)t.push(mo>0?"push +1":"risparmio −1");if(sc)t.push(sc>0?"scia +1":"aria sporca, scia −1");if(dr)t.push("DRS +2");if(c.dG>0&&drs(cell)&&a&&g<=7)t.push("DRS guasto");if(hm)t.push("Hammer Time +2");if(pw)t.push("calo di potenza −1");if(pp)t.push("traiettoria +1");
+  s=Math.max(.5,b+ty+sc+dr+pp+mo+c.fid+c.ex+jd+hm+pw+rb);
+  t.push(`base ${b}`,`gomma ${c.tyre} ${ty>=0?"+":""}${ty}`);if(mo)t.push(mo>0?"push +1":"risparmio −1");if(sc)t.push(sc>0?"scia +1":"aria sporca, scia −1");if(dr)t.push("DRS +2");if(c.dG>0&&drs(cell)&&a&&g<=7)t.push("DRS guasto");if(hm)t.push("Hammer Time +2");if(pw)t.push("malus carta −1");if(rb)t.push("rimbalzo +"+rb);if(pp)t.push("traiettoria +1");
   if(c.fid)t.push(`fiducia +${c.fid}`);if(c.ex)t.push(`carte ${c.ex>0?"+":""}${c.ex}`);if(jd)t.push("jump start −5")}
  if(c.kill){if(!S.sc){s=Math.max(.5,s/2);t.push("spento al via: metà passo")}c.kill=0}
  const sj=c.sj;c.sj=0;c.ex=0;c.don=0;let nd=c.dist+s;
@@ -459,7 +461,7 @@ function use0(p,k,m,f,xs){
  case"Track Limits":{if(S.sc)return 0;const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" penalizzato −6 caselle (track limits)":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.dist-=6;settle(t,-1);fx(t,"bad",`${t.code}: track limits, −6 caselle`);hit(t,k,p)}return 1}
  case"Errore":{if(S.sc)return 0;const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" −10 caselle":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.dist-=10;settle(t,-1);fx(t,"bad",`${t.code}: Errore, −10 caselle`);hit(t,k,p)}return 1}
  case"Talento Naturale":{const b0=baseStep((low.ovr+low.tov)/2);low.ovr+=3;const b1=baseStep((low.ovr+low.tov)/2);fx(low,"good",`${low.code}: +3 overall (passo base ${b0} → ${b1})`);say(`${P}: ${low.code} +3 overall fino a fine gara (passo base ${b0} → ${b1})`);return 1}
- case"Degrado Gomme Extra":{const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" +1 giro di usura":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.wear+=1;fx(t,"bad",`${t.code}: gomme +1 giro di usura`);hit(t,k,p)}return 1}
+ case"Degrado Gomme Extra":{const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" −1 passo per un giro (gomme degradate)":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.pL=40;fx(t,"bad",`${t.code}: gomme degradate, −1 passo per un giro`);hit(t,k,p)}return 1}
  case"Fiducia":low.fid++;fx(low,"good",`${low.code}: +1 passo fisso`);say(`${P}: ${low.code} +1 passo fisso per tutta la gara`);return 1;
  case"Cambio di Traiettoria":{const x=xs;if(S.sc||!x||!x.pb||x.pb.r!=S.round-1||x.pb.cc||x.pit||x.ret||x.fin||x.pb.a.pi==x.pi||x.pb.a.ret||x.dist>x.pb.a.dist)return 0;S.cam.push({x,a:x.pb.a});say(`${P}: ${x.code} prova a riprendersi la posizione su ${x.pb.a.code} (effetto a fine round)`);return 1}
  case"Buona Partenza":if(!R1)return 0;c.ex+=2;c.sj=1;fx(c,"good",`${c.code}: Buona Partenza +2`);say(`${P}: ${c.code} +2 passi alla partenza`);return 1;
@@ -510,7 +512,7 @@ const tyTxt=c=>{const i=tyInfo(c),f=v=>`<b class="${v>0?"gn":v<0?"ls":""}">${fs(
 // stima del passo del prossimo round: base (media pilota+monoposto) + gomma + scia/DRS/traiettoria sulla corsia scelta + guida + carte
 function estStep(c){const av=(c.ovr+c.tov)/2,b=baseStep(av);if(S.sc)return{av,b,e:S.vsc?CFG.VSC_STEP:(S.cars.filter(x=>!x.ret&&!x.fin&&!(x.pit>0)).sort((x,y)=>y.dist-x.dist)[0]===c?1:SCF),sc:1};
  const[a,g]=near(c),pf=pref(cellOf(c.dist)),ln=c.wl!=null?c.wl:(a&&g<5?a.lane:pf>=0?pf:c.lane),ty=md(c),sc=a&&g<5?(a.aS==lapOf(a.dist)?-1:(a.lane==ln?1:0)):0,dr=a&&drs(cellOf(c.dist))&&g<=7&&!(c.dG>0)?2:0,pp=pf==ln?1:0,mo=c.lm||0;
- return{av,b,e:Math.max(.5,b+ty+sc+dr+pp+mo+(c.fid||0)+(c.ex||0)+(c.hT>0?2:0)-(c.pL>0?1:0))}}
+ return{av,b,e:Math.max(.5,b+ty+sc+dr+pp+mo+(c.fid||0)+(c.ex||0)+(c.hT>0?2:0)-(c.pL>0?1:0)+rbBonus(c))}}
 const stTxt=c=>{const q=estStep(c);return q.sc?`${S.vsc?"Virtual Safety Car":"Safety Car"}: passo fisso <b>${fm(q.e)}</b>`:`media <b>${fm(q.av)}</b> → passo base <b>${fm(q.b)}</b> <span class="mut">(con gomma, scia, guida e bonus: <b class="${q.e>q.b?"gn":q.e<q.b?"ls":""}">${fm(q.e)}</b>)</span>`};
 const upTy=()=>{document.querySelectorAll(".tyv").forEach(e=>{const c=S.cars.find(x=>x.code==e.dataset.c);if(c)e.innerHTML=tyTxt(c)});document.querySelectorAll(".stv").forEach(e=>{const c=S.cars.find(x=>x.code==e.dataset.c);if(c)e.innerHTML=stTxt(c)})};
 function turnFor(){const pid=S.hq[S.hi];S.cur=pid;S.played=0;$("who").textContent="Tocca a G"+(pid+1);
@@ -698,6 +700,7 @@ const CFG={
  SEASON_RACES:23,GAP:1,     // gare per stagione in carriera
  OVR_MAX:99,          // OVR massimo di piloti e monoposto
  BONUS:3,             // bonus +3 del sorteggio casuale (si risorteggia a ogni gara nel Draft)
+ RB:[[15,.5],[25,1],[35,1.5],[45,2],[55,2.5],[65,3]],   // rimbalzo: [distacco dal leader in caselle, bonus passo]
  SAVE_KEY:"f1cr_career_v1",SAVE_SLOTS:5,
  // Prezzi monoposto (M), legati alla scuderia del gioco base (il prezzo segue l'OVR: Williams 93 → 88M, Alpine 87 → 67M)
  CAR_PRICE:{"McLaren":98,"Mercedes":95,"Red Bull":93,"Ferrari":92,"Williams":88,"RB":84,"Aston Martin":80,"Haas":76,"Audi":72,"Alpine":67},
@@ -957,7 +960,7 @@ function showHelp(back){
  <li>↩️ <b>Cambio di Traiettoria</b>: se sei stato superato torni davanti; ti viene chiesto quando serve.</li>
  <li>🚧 <b>Track Limits</b> −6 caselle e 💥 <b>Errore</b> −10 a un avversario (bersaglio con d20).</li>
  <li>⭐ <b>Talento Naturale</b> +3 OVR fino a fine gara · 💪 <b>Fiducia</b> +1 passo per tutta la gara.</li>
- <li>🛞 <b>Degrado Gomme Extra</b> · 🔧 <b>Problemi Meccanici</b> (avversario ai box) · 🛡️ <b>Difesa Impenetrabile</b> (nessuno ti passa).</li>
+ <li>🛞 <b>Degrado Gomme Extra</b> −1 passo per un giro · 🔧 <b>Problemi Meccanici</b> (avversario ai box) · 🛡️ <b>Difesa Impenetrabile</b> (nessuno ti passa).</li>
  <li>🚨 <b>Safety Car</b>: auto compattate a 0,5 caselle in ordine di gara · 💣 <b>Incidente</b>: piloti eliminati a caso (dadi).</li>
  <li>🔨 <b>Hammer Time</b> +2 passi per un giro · ⏱️ <b>Box Perfetto</b> sosta di 1 solo round (non con Safety Car/VSC) · 🧊 <b>Gestione Gomme</b> la gomma non si consuma per 1 giro · 🕵️ <b>Spionaggio</b> vedi la mano di un avversario a tua scelta.</li>
  <li>🌫️ <b>Aria Sporca</b> la giochi sul tuo pilota, senza dadi: fino alla fine del giro chi ti segue a meno di 5 caselle non prende la scia e fa −1 passo (inevitabile, in qualsiasi corsia) · 📉 <b>Calo di Potenza</b> −1 passo per un giro · 🐌 <b>Sosta Lenta</b> la prossima sosta dura 1 round in più · 🚫 <b>DRS Guasto</b> niente DRS per un giro (bersaglio con d20, può colpire anche il tuo compagno).</li>
@@ -1018,7 +1021,7 @@ function draftTurn(keep){
   mineT=NET.on?pid==ME:pid<NH(),sc=keep&&$("ov").firstElementChild?$("ov").firstElementChild.scrollTop:0;
  if(!NET.client){
   // turno CPU: sceglie a caso tra i pezzi consentiti, senza spendere troppo in un solo slot (così restano pezzi economici per tutti) (se non ce ne sono, il più economico)
-  const auto=()=>{const c0=pool.filter(allowed),cap=b/(3-rd)*1.4,c1=c0.filter(i=>pr(kind,i)<=cap),c=c1.length?c1:c0;return c.length?c[Math.floor(Math.random()*c.length)]:[...pool].sort((x,y)=>pr(kind,x)-pr(kind,y))[0]};
+  const auto=()=>{const c0=pool.filter(allowed),ov=i=>kind=="c"?TEAMS[i][1]:DRV[i][1];if(c0.length){const mx=Math.max(...c0.map(ov)),t=c0.filter(i=>ov(i)==mx);return t[Math.floor(Math.random()*t.length)]}return [...pool].sort((x,y)=>pr(kind,x)-pr(kind,y))[0]};
   if(pid>=NH())return draftApply(pid,auto());
   // caso limite: nessuna scelta lascia il budget per completare la squadra → assegnazione d'ufficio del pezzo più economico
   if(pool.length&&!pool.some(can)){const i=pool.sort((x,y)=>pr(kind,x)-pr(kind,y))[0];
