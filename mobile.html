@@ -174,11 +174,11 @@ body.mob .toast{font-size:10px;padding:8px 12px}body.mob .mt button{padding:6px 
 .mch{flex:0 0 auto;display:flex;align-items:center;gap:5px;padding:4px 8px;background:#0d0f15;border:1px solid var(--bd);font-family:var(--f1);font-size:10px;border-radius:3px}.mch i{width:4px;height:14px;border-radius:1px}.mch.me{border-color:#ffd23f;color:#ffd23f}.mch.sel{box-shadow:0 0 0 2px var(--neon)}
 .tbb{flex:1}.tbb.on{background:var(--ac);border-color:#ff4a43}
 body.mob .bar{flex-wrap:wrap;overflow:visible}body.mob #menu{flex:1 1 100%!important;display:flex;flex-wrap:wrap;gap:8px;padding-top:8px;border-top:1px solid var(--bd)}
-body.mob .mapw{position:relative}body.mob #mhud{display:flex;position:absolute;left:6px;top:6px;gap:6px;z-index:2;pointer-events:none}
+body.mob .mapw{position:relative}body.mob #mhud{display:flex;flex-wrap:wrap;position:static;gap:6px;margin:0 0 6px}
 body.mob #mstrip{display:flex;gap:6px;overflow-x:auto;padding:6px 0 2px}
 body.mob .tabs{display:flex;gap:6px;margin:4px 0}body.mob .hint{display:block;font-size:11px;color:var(--mut);margin:0 0 2px 4px}body.mob .mdb i{display:none}
 body.mob .pc{display:none}body.mob .pc.act{display:grid;grid-template-columns:minmax(0,1fr)}
-body.mob .mdb,body.mob .lnb{flex:1 1 0;min-width:0}
+
 body.mob .hcs{flex-wrap:nowrap;overflow-x:auto;scroll-snap-type:x proximity;padding-bottom:6px}body.mob .hc{flex:0 0 140px;width:auto;scroll-snap-align:start}
 body.mob #turn:not([hidden]){position:fixed;left:0;right:0;bottom:0;max-height:54vh;overflow:auto;z-index:44;border-radius:14px 14px 0 0;margin:0;padding:4px 10px 0;border-top:2px solid var(--ac);box-shadow:0 -10px 30px rgba(0,0,0,.75);animation:sheet .35s}
 @keyframes sheet{from{transform:translateY(100%)}to{transform:none}}
@@ -241,6 +241,18 @@ body.mob #endbar .bar button{flex:1 1 100%}
 #t3{position:absolute;left:8px;top:8px;width:172px;background:rgba(8,10,14,.84);border:1px solid #e10600;border-radius:4px;font-family:var(--f1,Orbitron,sans-serif);font-size:10px;color:#fff;z-index:2;overflow:hidden}body.mob #t3{display:none}
 .t3h{background:#e10600;text-align:center;padding:4px;font-weight:700;letter-spacing:1px}.t3r{display:flex;align-items:center;gap:6px;padding:2px 6px;cursor:pointer}.t3r:nth-child(even){background:rgba(255,255,255,.045)}.t3r.sel{outline:1px solid #00e5ff;outline-offset:-1px}.t3r i{width:4px;height:11px;flex:none}.t3r b{width:16px;color:#9aa0b4}.t3r span{flex:1}.t3r span.hu{color:#ffd23f}.t3r em{font-style:normal;color:#00e5ff}
 #sc3{display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);background:#ffd23f;color:#111;font-family:var(--f1,Orbitron,sans-serif);font-weight:700;font-size:12px;letter-spacing:2px;padding:5px 16px;border-radius:3px;z-index:3;animation:sc3b 1s infinite alternate}@keyframes sc3b{to{opacity:.55}}
+/* ===== CARTE: effetto + disegno · MAPPA MOBILE ===== */
+.hc{display:flex;flex-direction:column;min-height:96px}
+.hc b{display:block!important;margin:0 0 2px!important;font-size:8.5px}
+.hc small.ef{display:block!important;font-size:11px;line-height:1.2;color:#dfe6f5;margin:0 0 3px}
+.hc svg{display:block;width:54px;height:34px;margin:auto auto 0}
+.hc .e,.hc .tip{display:none!important}
+body.mob .hc svg{width:44px;height:28px}
+body.mob .mdb,body.mob .lnb{flex:1 1 auto;min-width:max-content;white-space:nowrap}
+body.mob .ctl>i.mut{flex:1 1 100%}
+body.mob:has(#turn:not([hidden])) #map{max-height:calc(100dvh - 44vh - 150px)!important}
+body.mob:has(#turn:not([hidden])) #v3{height:calc(100dvh - 44vh - 190px);min-height:150px}
+body.mob:has(#turn:not([hidden])) #mstrip{display:none}
 </style><link rel="manifest" href="manifest-f1mobile.json"><meta name="theme-color" content="#e10600"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="F1 Card Racer"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})</script></head><body>
 <div class="mast"><div class="lg"><b>F1</b><span>CARD RACER</span></div><div style="display:flex;gap:16px;align-items:center"><span id="rm" class="mut" style="font-weight:700;color:#ffd23f"></span><span id="bud"></span><span id="hdr"></span><div class="live"><i></i>LIVE</div></div></div>
 <div class="tick" id="tick"><b>LIVE</b><span>In attesa del via…</span></div>
@@ -278,8 +290,33 @@ const pref=c=>c%8<3?-1:(((c>>3)+(c%8>5?1:0))%3),drs=c=>c<=5||(c>=20&&c<=26);
 const ag=c=>Math.min(10,Math.max(1,Math.floor(lapOf(c.dist)-c.ts+1+c.wear-(c.pit?1:0)))),md=c=>TY[c.tyre][ag(c)-1]-(c.tp||0),fs=n=>(n>0?"+":"")+n;
 const tyb=c=>`<span class="ty ${c.tyre}">${c.tyre}</span> giro ${ag(c)}/10<i class="wb"><u style="width:${ag(c)*10}%"></u></i><b>${fs(md(c))}</b>${c.gg>0?` <span class="ty" style="background:#00e5ff;width:auto;padding:0 5px">🧊${c.gg}</span>`:""}`;
 let S,timer=null;const NH=()=>+$("nh").value,isH=i=>!S.ff&&i<NH();
-const CAM="Cambio di Traiettoria";let SPT=null,SCF=5,DS={e:0,o:0},QUIET=0,AUTO=true,SND=true,CMR=MOBILE?2.2:0,DQ=[],DB=0,AC=null;const FXH=[];
-const CD={"Sorpasso Azzardato":["🎯","Attacca chi è a 1 casella davanti: dado pari = sorpasso, dispari = fallisce (tu −1 casella, lui +1)"],"Cambio di Traiettoria":["↩️","Se sei stato superato, torna davanti"],"Track Limits":["🚧","Un avversario perde 6 caselle"],"Errore":["💥","Un avversario perde 10 caselle"],"Talento Naturale":["⭐","+3 overall fino a fine gara"],"Degrado Gomme Extra":["🛞","Un avversario: −2 passi per un giro"],"Fiducia":["💪","+1 passo fisso per tutta la gara"],"Problemi Meccanici":["🔧","Un avversario deve fermarsi ai box"],"Difesa Impenetrabile":["🛡️","Nessuno ti supera in questo round"],"Safety Car":["🚨","Safety Car in pista"],"Incidente":["💣","Incidente: piloti eliminati a caso"],"Hammer Time":["🔨","+2 passi per un giro (40 caselle)"],"Box Perfetto":["⏱️","La sosta ai box dura sempre 1 solo round, senza penalità doppio pit/rilascio (non con SC/VSC)"],"Gestione Gomme":["🧊","Per 1 giro la gomma non si consuma"],"Spionaggio":["🕵️","Vedi le carte di un avversario a tua scelta"],"Aria Sporca":["🌫️","Chi ti segue (a meno di 5 caselle) fino a fine giro non prende la scia e fa −1 passo"],"Ricorso":["⚖️","Scatta da sola: annulla una carta avversaria che ti colpisce"],"Virtual Safety Car":["🟨","Tutti avanzano di 0,5 caselle per 2 round, come la Safety Car"],"Bandiera Rossa":["🔴","Gara sospesa: si riparte dalla griglia, giri e posizioni mantenuti, gomme nuove gratis (non al 1° giro)"],"Calo di Potenza":["📉","Pilota a caso (anche il tuo compagno): −1 passo per un giro"],"Sosta Lenta":["🐌","Pilota a caso (anche il tuo compagno): la prossima sosta dura 1 round in più"],"DRS Guasto":["🚫","Pilota a caso (anche il tuo compagno): niente DRS per un giro"]};
+const CAM="Cambio di Traiettoria";let SPT=null,SCF=5,DS={e:0,o:0},QUIET=0,AUTO=true,SND=true,CMR=0,DQ=[],DB=0,AC=null;const FXH=[];
+const CD={"Sorpasso Azzardato":["🎯","Attacca chi è a 1 casella davanti: dado pari = sorpasso, dispari = fallisce (tu −1 casella, lui +1)"],"Cambio di Traiettoria":["↩️","Se sei stato superato, torna davanti"],"Track Limits":["🚧","Un pilota a caso tra i primi 10 perde 6 caselle"],"Errore":["💥","Un pilota a caso tra i primi 10 perde 10 caselle"],"Talento Naturale":["⭐","+3 overall fino a fine gara"],"Degrado Gomme Extra":["🛞","Un pilota a caso tra i primi 10: −2 passi per un giro"],"Fiducia":["💪","+1 passo fisso per tutta la gara"],"Problemi Meccanici":["🔧","Un pilota a caso tra i primi 10 deve fermarsi ai box"],"Difesa Impenetrabile":["🛡️","Nessuno ti supera in questo round"],"Safety Car":["🚨","Safety Car in pista"],"Incidente":["💣","Elimina 1-3 piloti a caso tra i primi 10 (dado)"],"Hammer Time":["🔨","+2 passi per un giro (40 caselle)"],"Box Perfetto":["⏱️","La sosta ai box dura sempre 1 solo round, senza penalità doppio pit/rilascio (non con SC/VSC)"],"Gestione Gomme":["🧊","Per 1 giro la gomma non si consuma"],"Spionaggio":["🕵️","Vedi le carte di un avversario a tua scelta"],"Aria Sporca":["🌫️","Chi ti segue (a meno di 5 caselle) fino a fine giro non prende la scia e fa −1 passo"],"Ricorso":["⚖️","Scatta da sola: annulla una carta avversaria che ti colpisce"],"Virtual Safety Car":["🟨","Tutti avanzano di 0,5 caselle per 2 round, come la Safety Car"],"Bandiera Rossa":["🔴","Gara sospesa: si riparte dalla griglia, giri e posizioni mantenuti, gomme nuove gratis (non al 1° giro)"],"Calo di Potenza":["📉","Pilota a caso (anche il tuo compagno): −1 passo per un giro"],"Sosta Lenta":["🐌","Pilota a caso (anche il tuo compagno): la prossima sosta dura 1 round in più"],"DRS Guasto":["🚫","Pilota a caso (anche il tuo compagno): niente DRS per un giro"]};
+const STB={"Partenza a Razzo":"+4","Buona Partenza":"+2","Partiti":"+1","Partenza Regolare":"0","Spegnimento al Via":"un pilota a caso, anche tuo: metà passo","Jump Start":"+1 ora, −5 in un giro estratto"},stL=k=>STB[k]?`${k} (${STB[k]})`:k;
+const ICO={
+'Sorpasso Azzardato':'<rect x="4" y="7" width="18" height="18" rx="3"/><circle cx="10" cy="13" r="1.4" fill="#ffd23f" stroke="none"/><circle cx="16" cy="13" r="1.4" fill="#ffd23f" stroke="none"/><circle cx="10" cy="19" r="1.4" fill="#ffd23f" stroke="none"/><circle cx="16" cy="19" r="1.4" fill="#ffd23f" stroke="none"/><path d="M28 16h15M38 10l6 6-6 6" stroke="#2ee87a"/>',
+'Cambio di Traiettoria':'<path d="M6 27C6 8 30 24 40 9"/><path d="M31 7l9 2-2 9" stroke="#ffd23f"/>',
+'Track Limits':'<path d="M7 3v26M41 3v26" stroke="#fff"/><path d="M15 5v22" stroke-dasharray="3 3"/><rect x="28" y="11" width="15" height="9" rx="2" stroke="#ff4d4d" transform="rotate(20 35 15)"/>',
+'Errore':'<polygon points="24,2 28,11 38,6 33,15 44,18 33,22 38,30 28,25 24,32 20,25 10,30 15,22 4,18 15,15 10,6 20,11" stroke="#ff4d4d" fill="rgba(255,77,77,.25)"/>',
+'Talento Naturale':'<polygon points="24,3 29,13 40,14.5 32,22 34,31 24,26 14,31 16,22 8,14.5 19,13" stroke="#ffd23f" fill="rgba(255,210,63,.25)"/>',
+'Degrado Gomme Extra':'<circle cx="17" cy="16" r="11"/><circle cx="17" cy="16" r="4"/><path d="M38 6v18M32 18l6 6 6-6" stroke="#ff4d4d"/>',
+'Fiducia':'<text x="24" y="24" text-anchor="middle" font-size="20" font-weight="700" fill="#2ee87a" stroke="none" font-family="Orbitron,sans-serif">+1</text>',
+'Problemi Meccanici':'<circle cx="24" cy="16" r="7"/><path d="M24 3v5M24 24v5M11 16h5M32 16h5M15 7l3 3M30 22l3 3M33 7l-3 3M18 22l-3 3" stroke="#ffd23f"/>',
+'Difesa Impenetrabile':'<path d="M24 3l15 5v9c0 7-6 11-15 14C15 28 9 24 9 17V8z"/><path d="M17 16l5 5 9-9" stroke="#2ee87a"/>',
+'Safety Car':'<rect x="7" y="8" width="34" height="16" rx="4" stroke="#ffd23f"/><text x="24" y="21" text-anchor="middle" font-size="12" font-weight="700" fill="#ffd23f" stroke="none" font-family="Orbitron,sans-serif">SC</text>',
+'Incidente':'<rect x="3" y="14" width="17" height="8" rx="2" transform="rotate(-15 11 18)" stroke="#fff"/><rect x="28" y="14" width="17" height="8" rx="2" transform="rotate(15 37 18)" stroke="#fff"/><path d="M24 3l2 6 6-3-3 6" stroke="#ffd23f"/>',
+'Hammer Time':'<path d="M9 28L26 12" stroke="#fff" stroke-width="3"/><rect x="19" y="3" width="18" height="9" rx="2" transform="rotate(45 28 7.5)" stroke="#ffd23f"/>',
+'Box Perfetto':'<circle cx="24" cy="18" r="11" stroke="#2ee87a"/><path d="M24 18v-7M20 3h8M24 3v4" stroke="#2ee87a"/>',
+'Gestione Gomme':'<circle cx="24" cy="16" r="12"/><path d="M24 6v20M15 11l18 10M15 21l18-10" stroke="#9ff"/>',
+'Spionaggio':'<path d="M3 16C10 6 38 6 45 16C38 26 10 26 3 16z"/><circle cx="24" cy="16" r="5" fill="#ffd23f" stroke="none"/>',
+'Aria Sporca':'<path d="M4 8c6-4 6 4 12 0s6 4 12 0 6 4 12 0"/><path d="M4 16c6-4 6 4 12 0s6 4 12 0 6 4 12 0" stroke="#aab"/><path d="M4 24c6-4 6 4 12 0s6 4 12 0 6 4 12 0" stroke="#778"/>',
+'Ricorso':'<path d="M24 4v22M12 27h24M9 9h30"/><path d="M9 9l-5 10h10zM39 9l-5 10h10z" stroke="#ffd23f"/>',
+'Virtual Safety Car':'<rect x="5" y="8" width="38" height="16" rx="4" stroke="#ffd23f"/><text x="24" y="20.5" text-anchor="middle" font-size="11" font-weight="700" fill="#ffd23f" stroke="none" font-family="Orbitron,sans-serif">VSC</text>',
+'Bandiera Rossa':'<path d="M10 3v26"/><path d="M10 5h26l-6 7 6 7H10z" fill="#e10600" stroke="#ff4d4d"/>',
+'Calo di Potenza':'<rect x="5" y="9" width="32" height="14" rx="2"/><path d="M40 13v6" stroke-width="4"/><rect x="8" y="12" width="7" height="8" fill="#ff4d4d" stroke="none"/>',
+'Sosta Lenta':'<path d="M15 4h18M15 28h18M17 4c0 9 14 10 14 24M31 4c0 9-14 10-14 24" stroke="#ffd23f"/>',
+'DRS Guasto':'<rect x="5" y="10" width="26" height="6" rx="2"/><path d="M11 16v8M25 16v8"/><path d="M33 6l11 20M44 6L33 26" stroke="#ff4d4d"/>'};
+const ico=k=>`<svg viewBox="0 0 48 32" fill="none" stroke="#00e5ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICO[k]||""}</svg>`;
 const FR={1:"rotateX(0deg) rotateY(0deg)",6:"rotateY(180deg)",2:"rotateY(-90deg)",5:"rotateY(90deg)",3:"rotateX(-90deg)",4:"rotateX(90deg)"};
 const TR={cx:450,cy:215,a:215,r:120},PER=4*TR.a+2*Math.PI*TR.r,M={race:null,els:{},first:0};
 const fx=(c,k,m)=>{if(!c||c.pi>=NH()||S.ff||!S.fx)return;if(NET.host&&NET.started)NET.evq.push({f:1,k,m,code:c.code,pi:c.pi});if(mine(c.pi))S.fx.push({k,m,code:c.code})};
@@ -311,8 +348,8 @@ function resolve(c,L0,D,nd,man){const d0=c.dist,G=CFG.GAP,E=1e-6,ot=S.cars.filte
 const RE=["Sorpasso Azzardato","Cambio di Traiettoria"];
 const draw=p=>{if(!S.deck.length){S.deck=sh(S.disc);S.disc=[]}if(S.deck.length)p.hand.push(S.deck.pop())};
 const tag=c=>`<b style="background:${COL[c.ti]}">${c.code}</b>`;
-function tgt(){let r=R(20),t=cls()[r-1],n=0;while(t&&t.pit>0&&n++<40){r=R(20);t=cls()[r-1]}   // non si può colpire un'auto ai box: si ritira il dado
- if(S.cp!=null&&S.cp<NH())dice("Bersaglio",r,20);return[r,t&&!t.ret&&!t.fin?t:null]}
+function tgt(N=20){let r=R(N),t=cls()[r-1],n=0;while(t&&t.pit>0&&n++<40){r=R(N);t=cls()[r-1]}   // non si può colpire un'auto ai box: si ritira il dado
+ if(S.cp!=null&&S.cp<NH())dice(N<20?"Bersaglio · primi "+N:"Bersaglio",r,N);return[r,t&&!t.ret&&!t.fin?t:null]}
 // bersaglio a caso (d20) per le carte Aria Sporca, Calo di Potenza, Sosta Lenta, DRS Guasto: può colpire anche il compagno di squadra
 function tgtO(p){return tgt()}
 // Ricorso: scatta da solo e annulla la carta avversaria che sta colpendo un pilota del possessore (si può disattivare nel proprio turno)
@@ -328,7 +365,7 @@ function redFlag(p,k){const l=live().sort((a,b)=>b.dist-a.dist);if(l.length<2)re
  say(`🃏 G${p.id+1} ${k}: 🔴 BANDIERA ROSSA, gara sospesa. Si riparte da fermi dalla griglia: posizioni e giri attuali (giro ${Lr}/10), auto a ${CFG.SC_GAP} caselle una dall'altra, cambio gomme gratis per tutti (stessa mescola)`);return 1}
 // Spionaggio: scelta dell'avversario e mostra la sua mano (solo a chi gioca la carta)
 function spyHtml(t){const h=t.hand.length?t.hand.map(k=>`<div class="row">${(CD[k]||["🃏"])[0]} <b>${k}</b> <small>${(CD[k]||["",""])[1]}</small></div>`).join(""):'<p class="mut">Nessuna carta in mano.</p>';
- return`<h3>🕵️ SPIONAGGIO · G${t.id+1}</h3>${t.st&&t.st.some(Boolean)?`<p>Carte di partenza: ${t.st.filter(Boolean).join(", ")}</p>`:""}<p>Mano di G${t.id+1} (${t.hand.length}):</p>${h}<button class="p" onclick="ovx()">Chiudi</button>`}
+ return`<h3>🕵️ SPIONAGGIO · G${t.id+1}</h3>${t.st&&t.st.some(Boolean)?`<p>Carte di partenza: ${t.st.filter(Boolean).map(stL).join(", ")}</p>`:""}<p>Mano di G${t.id+1} (${t.hand.length}):</p>${h}<button class="p" onclick="ovx()">Chiudi</button>`}
 function spyChoose(){if(S.played)return;const me=NET.client?ME:S.cur;
  ovp(`<h3>🕵️ SPIONAGGIO</h3><p>Di chi vuoi vedere le carte?</p>${S.pl.filter(q=>q.id!=me).map(q=>`<div class="row"><button class="p" onclick="spyPick(${q.id})">G${q.id+1} · ${TEAMS[q.t][0]}</button></div>`).join("")}<div class="row"><button onclick="ovx()">Annulla</button></div>`)}
 function spyPick(i){ovx();SPT=i;try{playH("Spionaggio")}finally{SPT=null}}
@@ -401,7 +438,7 @@ function go(q){
  fin(ps,q)}
 function fin(ps,q){
  if(S.rel&&S.rel.length){const r=S.rel;S.rel=[];dice("Rilascio box · "+r.map(x=>x[0]).join(" + ")+" (detto → uscito)",r.flatMap(x=>[x[1],x[2]]))}
- const real=ps.filter(([a,b])=>a.dist>b.dist);real.forEach(([a,b])=>{b.pb={a,r:S.round,cc:a.cc==S.round&&a.ccv===b.code}});
+ const real=ps.filter(([a,b])=>a.dist>b.dist&&b.xq!==S.round);real.forEach(([a,b])=>{b.pb={a,r:S.round,cc:a.cc==S.round&&a.ccv===b.code}});
  if(!q)real.forEach(([a,b])=>{if(a.pi!=b.pi){fx(a,"good",`↗ ${a.code} supera ${b.code}`);fx(b,"bad",`↘ ${b.code} superato da ${a.code}`)}});
  real.slice(0,6).forEach(([a,b])=>say(`↗ ${a.code} supera ${b.code}`));if(real.length>6)say(`… e altri ${real.length-6} sorpassi`);
  const nf=[];live().filter(c=>c.dist>=400).sort((a,b)=>b.dist-a.dist||b.sd-a.sd).forEach(c=>{c.fin=++S.fin;c.lp=10;nf.push(c)});
@@ -425,7 +462,7 @@ function mv(c,order){
  const H=isH(c.pi);
  if(c.pit){c.pit--;c.bx=S.round;const k=c.pn-c.pit;let t=`fermo ai box, turno ${k}`;say(`🛠 ${c.code} fermo ai box (turno ${k})`);
   if(!c.pit&&!c.dd){c.dd=1;const a=c.dnum||R(6),b=R(6);c.dnum=0;if(H)(S.rel=S.rel||[]).push([c.code,a,b]);/* i dadi di rilascio si mostrano insieme a fine round */t+=` · dado: detto ${a}, uscito ${b}`;say(`🎲 ${c.code} rilascio: ha detto ${a}, dado ${b} → ${a==b&&!c.bpf?"rilascio pericoloso, +1 turno fermo":"via libera"}`);if(a==b&&!c.bpf){c.pit=1;c.pn++}}
-  if(!c.pit){const xl=exitLane(c);if(xl<0){c.pit=1;c.pn++;t+=" · attende un varco";say(`🛠 ${c.code} attende un varco per rientrare in pista`)}else{c.lane=xl;c.tyre=c.nx;c.ts=L;c.wear=0;c.tp=0;c.pushed=0;c.gg=0;t+=` → riparte con ${c.nx}`;say(`🛠 ${c.code} riparte con gomma ${c.nx}`)}}
+  if(!c.pit){const k=pitExit(c);c.tyre=c.nx;c.ts=L;c.wear=0;c.tp=0;c.pushed=0;c.gg=0;if(k>0){c.lm=0;c.lmSet=0}const fl=k>0?`, in fila indiana ${fm(k*CFG.GAP)} caselle dietro il punto di uscita`:"";t+=` → riparte con ${c.nx}${fl}`;say(`🛠 ${c.code} riparte con gomma ${c.nx}${fl}`)}
   c.ds=0;S.mv.push([c,0,t]);return}
  const want=(c.fpr&&S.round>=c.fpr)||c.hp||(!isH(c.pi)&&c.si<c.pl.length-1&&lapOf(c.dist)>=c.pls[c.si]);
  let a=null,g=1e9;for(const o of order){if(o===c||o.ret||o.fin)continue;const d=o.sd-c.sd;if(d>=0&&d<g){g=d;a=o}}
@@ -452,26 +489,37 @@ function mv(c,order){
   c.nx=c.nxs||c.pl[c.si+1]||tyreFor(c);c.nxs=null;c.pl[c.si+1]=c.nx;c.si++;c.stops++;c.bx=S.round;c.fpr=0;c.hp=0;t.push("entra ai box");say(`🛠 ${c.code} entra ai box al traguardo (${why}): fermo ${c.pit} turni, poi monta ${c.nx}`)}}
  if(c.dist>=0&&Math.floor(nd/40)>Math.floor(c.dist/40)){if(c.gg>0){c.gg--;c.wear--}c.tp=c.lm>0?1:c.lm<0?-1:0;if(H&&c.tp>0)fx(c,"bad",`${c.code}: Push, gomma −1 al giro dopo`);if(H&&c.tp<0)fx(c,"good",`${c.code}: Risparmio, gomma +1 al giro dopo`)}
   c.ds=nd-c.dist;["hT","pL","dG"].forEach(q=>{if(c[q]>0)c[q]-=c.ds});c.dist=nd;S.mv.push([c,c.ds,t.join(", ")])}
+// Uscita dai box in fila indiana: l'auto esce dal punto di uscita normale (o in coda dietro, 1 casella una dall'altra) nella corsia centrale.
+// Le auto in pista che la ostacolano si spostano di corsia (sinistra/destra); se non possono, l'auto in uscita si mette più indietro. Non si aspetta mai un varco.
+function pitExit(c){const B=c.dist,G=CFG.GAP,E=1e-6,oth=()=>S.cars.filter(o=>o!==c&&onT(o)),
+ free=(o,ln)=>!oth().some(q=>q!==o&&q.lane===ln&&Math.abs(wrp(q.dist-o.dist))<G-E);
+ for(let k=0;k<80;k++){const p=B-k*G,bl=oth().filter(o=>o.lane===1&&Math.abs(wrp(o.dist-p))<G-E);
+  if(bl.some(o=>o.xq===S.round))continue;
+  const mvs=[];let ok=true;
+  for(const o of bl){const ln=[0,2].find(l=>free(o,l)&&!mvs.some(m=>m.l===l&&Math.abs(wrp(m.o.dist-o.dist))<G-E));if(ln===undefined){ok=false;break}mvs.push({o,l:ln})}
+  if(!ok)continue;
+  mvs.forEach(m=>{m.o.lane=m.l});c.dist=p;c.lane=1;c.xq=S.round;return k}
+ c.lane=1;c.xq=S.round;return 0}
 function use(p,k,m,f,xs){if(xs&&xs.pit>0)return 0;S.cp=p.id;try{return use0(p,k,m,f,xs)}finally{S.cp=null}}
 function use0(p,k,m,f,xs){
  const R1=S.round==1,c=xs||m[0],w=xs||m[m.length-1],low=xs||[...m].sort((a,b)=>a.ovr-b.ovr)[0],rk=x=>cls().indexOf(x)+1,P=`🃏 G${p.id+1} ${k}`;
  switch(k){
  case"Sorpasso Azzardato":if(S.sc)return 0;for(const x of (xs?[xs]:m)){if(x.pit)continue;const o=live().find(o=>!(o.pit>0)&&o.pi!=x.pi&&o.dist-x.dist>=0&&o.dist-x.dist<=1);
   if(o){const r=R(6);if(p.id<NH()){dice("Sorpasso Azzardato",r);r%2?DS.o++:DS.e++}S.sorp.push({x,o,r});say(`${P}: ${x.code} attacca ${o.code}, dado ${r} → ${r%2?"dispari, il sorpasso fallisce":"pari, il sorpasso riesce"} (effetto a fine round)`);return 1}}return 0;
- case"Track Limits":{if(S.sc)return 0;const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" penalizzato −6 caselle (track limits)":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.dist-=6;settle(t,-1);fx(t,"bad",`${t.code}: track limits, −6 caselle`);hit(t,k,p)}return 1}
- case"Errore":{if(S.sc)return 0;const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" −10 caselle":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.dist-=10;settle(t,-1);fx(t,"bad",`${t.code}: Errore, −10 caselle`);hit(t,k,p)}return 1}
+ case"Track Limits":{if(S.sc)return 0;const[r,t]=tgt(10);say(`${P}: bersaglio ${r}° → ${t?t.code+" penalizzato −6 caselle (track limits)":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.dist-=6;settle(t,-1);fx(t,"bad",`${t.code}: track limits, −6 caselle`);hit(t,k,p)}return 1}
+ case"Errore":{if(S.sc)return 0;const[r,t]=tgt(10);say(`${P}: bersaglio ${r}° → ${t?t.code+" −10 caselle":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.dist-=10;settle(t,-1);fx(t,"bad",`${t.code}: Errore, −10 caselle`);hit(t,k,p)}return 1}
  case"Talento Naturale":{const b0=baseStep((low.ovr+low.tov)/2);low.ovr+=3;const b1=baseStep((low.ovr+low.tov)/2);fx(low,"good",`${low.code}: +3 overall (passo base ${b0} → ${b1})`);say(`${P}: ${low.code} +3 overall fino a fine gara (passo base ${b0} → ${b1})`);return 1}
- case"Degrado Gomme Extra":{const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" −2 passi per un giro (gomme degradate)":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.pLm=Math.max(t.pL>0?(t.pLm||1):0,2);t.pL=40;fx(t,"bad",`${t.code}: gomme degradate, −2 passi per un giro`);hit(t,k,p)}return 1}
+ case"Degrado Gomme Extra":{const[r,t]=tgt(10);say(`${P}: bersaglio ${r}° → ${t?t.code+" −2 passi per un giro (gomme degradate)":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.pLm=Math.max(t.pL>0?(t.pLm||1):0,2);t.pL=40;fx(t,"bad",`${t.code}: gomme degradate, −2 passi per un giro`);hit(t,k,p)}return 1}
  case"Fiducia":low.fid++;fx(low,"good",`${low.code}: +1 passo fisso`);say(`${P}: ${low.code} +1 passo fisso per tutta la gara`);return 1;
  case"Cambio di Traiettoria":{const x=xs;if(S.sc||!x||!x.pb||x.pb.r!=S.round-1||x.pb.cc||x.pit||x.ret||x.fin||x.pb.a.pi==x.pi||x.pb.a.ret||x.dist>x.pb.a.dist)return 0;S.cam.push({x,a:x.pb.a});say(`${P}: ${x.code} prova a riprendersi la posizione su ${x.pb.a.code} (effetto a fine round)`);return 1}
  case"Buona Partenza":if(!R1)return 0;c.ex+=2;c.sj=1;fx(c,"good",`${c.code}: Buona Partenza +2`);say(`${P}: ${c.code} +2 passi alla partenza`);return 1;
  case"Partiti":if(!R1)return 0;c.ex+=1;fx(c,"good",`${c.code}: Partiti +1`);say(`${P}: ${c.code} +1 passo alla partenza`);return 1;
  case"Partenza a Razzo":if(!R1)return 0;c.ex+=4;c.sj=1;fx(c,"good",`${c.code}: Partenza a Razzo +4`);say(`${P}: ${c.code} +4 passi alla partenza`);return 1;
- case"Problemi Meccanici":{const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" ai box al prossimo turno":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.fpr=S.round+1;fx(t,"bad",`${t.code}: problemi meccanici, box obbligatorio: scegli la gomma nel pannello`);hit(t,k,p)}return 1}
+ case"Problemi Meccanici":{const[r,t]=tgt(10);say(`${P}: bersaglio ${r}° → ${t?t.code+" ai box al prossimo turno":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.fpr=S.round+1;fx(t,"bad",`${t.code}: problemi meccanici, box obbligatorio: scegli la gomma nel pannello`);hit(t,k,p)}return 1}
  case"Difesa Impenetrabile":if(!f&&rk(c)>8)return 0;c.def=S.round;say(`${P}: ${c.code} non superabile in questo round`);return 1;
  case"Safety Car":if((S.sc&&!S.vsc)||(!f&&(R1||rk(c)<10||lapOf(Math.max(...live().map(x=>x.dist)))>8||Math.random()>.4)))return 0;S.sc=1;S.vsc=0;S.scr=0;scBunch();say(`${P}: 🚨 SAFETY CAR in pista`);return 1;
  case"Incidente":{if(!f&&(S.round<3||Math.random()>.15))return 0;const d=R(6),n=Math.ceil(d/2);if(p.id<NH())dice("Incidente · quanti piloti",d);say(`${P}: dado ${d} → ${n} piloti coinvolti (metà, per eccesso)`);
-  for(let i=0;i<n;i++){const[r,t]=tgt();if(t){if(parry(t,k,p)){continue}t.ret=1;fx(t,"bad",`${t.code}: eliminato nell'incidente`);hit(t,k,p);say(`💥 bersaglio ${r}° → ${t.code} eliminato`)}else say(`bersaglio ${r}° → a vuoto`)}return 1}
+  for(let i=0;i<n;i++){const[r,t]=tgt(10);if(t){if(parry(t,k,p)){continue}t.ret=1;fx(t,"bad",`${t.code}: eliminato nell'incidente`);hit(t,k,p);say(`💥 bersaglio ${r}° → ${t.code} eliminato`)}else say(`bersaglio ${r}° → a vuoto`)}return 1}
  case"Spegnimento al Via":{if(!R1)return 0;const[r,t]=tgt();say(`${P}: bersaglio ${r}° → ${t?t.code+" spento al via":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.kill=1;fx(t,"bad",`${t.code}: spento al via!`);hit(t,k,p)}return 1}
  case"Jump Start":if(!R1)return 0;c.ex+=1;c.jump=R(8)+1;say(`${P}: ${c.code} +1 passo, pagherà −5 al giro ${c.jump}`);return 1;
  case"Partenza Regolare":if(!R1)return 0;say(`${P}: ${c.code} parte senza bonus né malus`);return 1;
@@ -498,7 +546,7 @@ function render(){renderChamp();if(S.over&&!S.ps&&!S.ff&&!S.wait){S.ps=1;setTime
   return`<tr data-c="${c.code}" onclick="selCar('${c.code}')" class="${hu?"me":""}${S.sel==c.code?" sel":""}${d>0?" gain":d<0?" loss":""}"><td class="pos">${pos}<i class="ar ${d>0?"up":d<0?"dn":""}">${d>0?"▲":d<0?"▼":""}</i></td><td><span class="tm" style="background:${COL[c.ti]}"></span><b class="cd3">${c.code}</b><span class="nm">${c.name}</span>${hu?'<span class="you">TU</span>':""}<small>${TEAMS[c.ti][0]} · ${AGE[c.di]} anni · G${c.pi+1} · cas. ${fm(((c.dist%40)+40)%40)}</small></td><td class="gp">${i==0?"LEADER":ok?"+"+fm(gap)+(itv?`<small>+${fm(itv)}</small>`:""):"–"}</td><td class="rt"><b>${bs}</b> passi base<small>media ${av.toFixed(1)} · ultimo +${fm(c.ds)}</small></td><td>${ok?tyb(c):c.tyre}</td><td>${c.pl.map((t,k)=>k==c.si?"<b>"+t+"</b>":t).join("→")}</td><td>${c.stops}</td><td>${st}</td></tr>`}).join("");
  drawMap();
  $("log").innerHTML=S.log;uiExtra();
- $("pl").innerHTML=S.pl.map(p=>`<tr><td>G${p.id+1}${p.id<NH()?" ★":""}${p.id<NH()?`<small class="mut">💰 ${mny(G.bud[p.id]||0)}</small>`:""}</td><td>${p.off.map(x=>DRV[x][0]+" ("+AGE[x]+"a)").join(" + ")} · ${TEAMS[p.ot][0]}</td><td>${p.d.map((x,j)=>DRV[x][0]+" ("+AGE[x]+"a)"+(p.db[j]?" (+3)":"")).join(" + ")} · ${TEAMS[p.t][0]}${p.tb?" (+3)":""}</td><td class="mut">${NH()?p.hand.length+" carte"+(p.st&&p.st.some(Boolean)?" + "+p.st.filter(Boolean).length+" partenza":""):(p.hand.length?p.hand.join(", "):"–")+(p.st&&p.st.some(Boolean)?" · partenza: "+p.st.filter(Boolean).join(", "):"")}</td></tr>`).join("")}
+ $("pl").innerHTML=S.pl.map(p=>`<tr><td>G${p.id+1}${p.id<NH()?" ★":""}${p.id<NH()?`<small class="mut">💰 ${mny(G.bud[p.id]||0)}</small>`:""}</td><td>${p.off.map(x=>DRV[x][0]+" ("+AGE[x]+"a)").join(" + ")} · ${TEAMS[p.ot][0]}</td><td>${p.d.map((x,j)=>DRV[x][0]+" ("+AGE[x]+"a)"+(p.db[j]?" (+3)":"")).join(" + ")} · ${TEAMS[p.t][0]}${p.tb?" (+3)":""}</td><td class="mut">${NH()?p.hand.length+" carte"+(p.st&&p.st.some(Boolean)?" + "+p.st.filter(Boolean).length+" partenza":""):(p.hand.length?p.hand.join(", "):"–")+(p.st&&p.st.some(Boolean)?" · partenza: "+p.st.filter(Boolean).map(stL).join(", "):"")}</td></tr>`).join("")}
 $("bn").onclick=()=>{AUTO=false;runAuto();step()};
 $("ba").onclick=()=>{AUTO=!AUTO;runAuto()};
 $("sp").onchange=runAuto;
@@ -528,11 +576,11 @@ function showTurn(){
   <div class="ctl"><span>Corsia</span>${[[null,"AUTO"],[0,"S"],[1,"C"],[2,"D"]].map(([v,n])=>`<button class="lnb${c.wl===v?" on":""}" data-c="${c.code}" data-v="${v===null?"":v}">${n}${v!==null?`<i>${pv[v]?(pv[v]>0?"+":"")+pv[v]:"0"}</i>`:""}</button>`).join("")}</div>
   ${(c.fpr&&!last)?`<div class="ctl" style="border-left:3px solid #ff4d4d;padding-left:6px"><span>🔧 BOX</span><b style="color:#ff4d4d">OBBLIGATORIO al prossimo traguardo</b>&nbsp;· scegli la gomma: <select class="nxs" data-c="${c.code}">${["S","M","H"].map(t=>`<option${t==nx?" selected":""}>${t}</option>`).join("")}</select> <i class="mut">rientro ≈ P${pitPrev(c)}</i></div>`:S.round>1?`<div class="ctl"><span>Box</span><label><input type="checkbox" class="bxc" data-c="${c.code}"${c.hp?" checked":""}${last?" disabled":""}> al prossimo traguardo</label> monta <select class="nxs" data-c="${c.code}">${["S","M","H"].map(t=>`<option${t==nx?" selected":""}>${t}</option>`).join("")}</select> <i class="mut">rientro ≈ P${pitPrev(c)}</i></div>`:""}
   ${c.pit==1&&!c.dd?`<div class="ctl"><span>🎲 Box</span>scegli il numero del dado <select id="dn-${c.code}">${[1,2,3,4,5,6].map(n=>`<option>${n}</option>`).join("")}</select></div>`:""}</div>`};
- const hand=Object.keys(cn).map(k=>{const d=CD[k]||["🃏",""],[tt,hot]=tipFor(k,m);return `<div class="hc${hot?" hot":""}" draggable="true" data-k="${k}"><div class="tip">💡 ${tt}</div><span class="e">${d[0]}</span><b>${k}</b><small>${d[1]}</small>${cn[k]>1?`<em>×${cn[k]}</em>`:""}</div>`}).join("");
+ const hand=Object.keys(cn).map(k=>{const d=CD[k]||["🃏",""];return `<div class="hc" draggable="true" data-k="${k}"><b>${k}</b><small class="ef">${d[1]}</small>${ico(k)}${cn[k]>1?`<em>×${cn[k]}</em>`:""}</div>`}).join("");
  $("tp").innerHTML=(rd.length?`<div class="radio">${rd.map(x=>`<p>📻 ${x}</p>`).join("")}</div>`:"")+(m.length>1?`<div class="tabs">${m.map(c=>`<button class="tbb" data-c="${c.code}">${c.code} · P${cls().indexOf(c)+1}</button>`).join("")}</div>`:"")+`<div class="pcs">${m.map(car).join("")}</div>`
  +(free.length?`<div class="hand"><div class="hlabel">MANO · trascina una carta su una tua auto in pista, oppure cliccala · su <select id="cs">${free.map(c=>`<option>${c.code}</option>`).join("")}</select> · 1 carta per turno${p.hand.includes("Ricorso")?` · <label><input type="checkbox" id="rco"${p.rcOff?"":" checked"}> Ricorso automatico</label>`:""}</div><div class="hcs">${hand||'<i class="mut">nessuna carta</i>'}</div></div>`:`<div class="row">🛠 Le auto ai box non possono usare carte.</div>`)
  +(p.hand.includes(CAM)?m.filter(c=>c.pb&&c.pb.r==S.round-1&&!c.pit&&!c.pb.cc&&c.pb.a.pi!=c.pi&&c.dist<=c.pb.a.dist).map(c=>`<div class="row">↩ ${c.code} è stato superato da ${c.pb.a.code}: usa <b>Cambio di Traiettoria</b> dalla mano (scegli ${c.code} nel menu).</div>`).join(""):"")
- +(S.round==1&&p.st&&p.st.some(Boolean)?`<div class="row">⚡ Carte di partenza (obbligatorie, una per pilota, si usano da sole): ${p.d.map((x,j)=>p.st[j]?`<b>${DRV[x][0]}</b> → ${p.st[j]}`:"").filter(Boolean).join(" · ")}</div>`:"")+`<div id="pe" class="mut"></div>`;
+ +(S.round==1&&p.st&&p.st.some(Boolean)?`<div class="row">⚡ Carte di partenza (obbligatorie, una per pilota, si usano da sole): ${p.d.map((x,j)=>p.st[j]?`<b>${DRV[x][0]}</b> → ${stL(p.st[j])}`:"").filter(Boolean).join(" · ")}</div>`:"")+`<div id="pe" class="mut"></div>`;
  const q$=(sel,fn)=>document.querySelectorAll(sel).forEach(fn),cc=b=>S.cars.find(x=>x.code==b.dataset.c),grp=(sel,b)=>q$(sel+`[data-c="${b.dataset.c}"]`,x=>x.classList.toggle("on",x===b));
  q$(".mdb",b=>b.onclick=()=>{const c=cc(b);c.lm=+b.dataset.v;c.lmSet=1;grp(".mdb",b);upTy()});
  q$(".lnb",b=>b.onclick=()=>{cc(b).wl=b.dataset.v===""?null:+b.dataset.v;grp(".lnb",b);upTy()});
@@ -558,7 +606,7 @@ if(MOBILE){document.body.classList.add("mob");
  const bar=document.querySelector(".bar"),mn=document.createElement("div"),bm=document.createElement("button");mn.id="menu";mn.hidden=true;bm.id="bm";bm.textContent="☰ Menu";
  ["bl","bf","bg","bgar","bmk","bs","ng","qf","nh"].forEach(id=>{const e=$(id);mn.appendChild(e.closest("label")||e)});
  bar.insertBefore(bm,$("sp").nextSibling);bar.appendChild(mn);bm.onclick=()=>{mn.hidden=!mn.hidden};
- document.querySelector(".leg").open=false;$("bcam").classList.add("on");$("bcam").textContent="🎥 Camera "+CMR+"x"}
+ document.querySelector(".leg").open=false;$("bcam").textContent="🎥 Camera"}
 $("shh").onclick=()=>$("turn").classList.toggle("min");
 function cambioPanel(hc){
  $("who").textContent="Cambio di Traiettoria";S.fx.push({k:"bad",m:"Sei stato superato: puoi usare Cambio di Traiettoria",code:hc[0][1].code});showFx();$("turn").classList.remove("alert");void $("turn").offsetWidth;$("turn").classList.add("alert");
@@ -612,7 +660,7 @@ function drawMap(durOv){
   const p=cl.indexOf(c)+1;e.querySelector("title").textContent=`${c.name} · ${TEAMS[c.ti][0]} · P${p} · gomma ${c.tyre} ${ag(c)}/10${c.pit?" · AI BOX":""}${c.ret?" · RITIRATO":""}`;
   e.querySelector(".sel").style.display=S.sel==c.code?"block":"none";if(S.sel==c.code)e.parentNode.appendChild(e)});
  const tg=S.cars.find(c=>c.code==S.sel)||S.cars.find(c=>c.pi<NH()&&!c.ret&&!c.fin)||cl[0],z=CMR||1,[tx,ty]=P[tg.code]||[cx,cy],w=$("world");
- w.style.transition=dur?`transform ${dur}ms linear`:"none";w.style.transform=CMR?`translate(${cx-tx*z}px,${cy-ty*z}px) scale(${z})`:"none";$("hudtw").style.display=CMR?"none":"block";
+ w.style.transition=dur?`transform ${dur}ms linear`:"none";w.style.transform=CMR?`translate(${cx-tx*z}px,${cy-ty*z}px) scale(${z})`:"none";$("hudtw").style.display=(CMR||MOBILE)?"none":"block";
  M.first=0;
  const Lp=S.over||!lv.length?10:Math.min(10,lapOf(Math.max(...lv.map(c=>c.dist))));
  let t=`<rect x="${cx-84}" y="${cy-84}" width="168" height="20" rx="4" fill="#e10600"/><text x="${cx}" y="${cy-70}" text-anchor="middle" class="tt">${S.over?"🏁 GARA FINITA":"GIRO "+Lp+" / 10"}</text>`;
@@ -954,12 +1002,12 @@ function showHelp(back){
  ov(`<h3>📖 COME SI GIOCA</h3><div class="helpw">
  ${sec("🎯 Obiettivo",`<p>Ogni giocatore guida una <b>scuderia</b>: 1 monoposto e 2 piloti. Vince chi porta i suoi piloti più in alto in classifica. In una gara si fanno <b>10 giri</b> (40 caselle l'uno, 400 in tutto); la classifica finale dà punti come in F1: <b>25-18-15-12-10-8-6-4-2-1</b> ai primi 10. Con più gare si gioca un campionato piloti e costruttori.</p>`,1)}
  ${sec("🏁 Come funziona un round",`<p>La gara avanza a <b>round</b>. Prima del round i giocatori umani fanno le loro scelte, poi tutte le auto si muovono insieme. Il passo di ogni auto dipende da: il <b>passo base</b> (media OVR pilota + monoposto: 1 casella a media 80, +0,2 per ogni punto, a mezze caselle, da 0,5 a 5), gomme e usure, modalità di guida, scia/DRS, corsia e dadi. Nei turni vedi il consiglio della radio ("📻") e il riquadro dei suggerimenti sulle carte.</p><p>Le <b>qualifiche</b> (Q1-Q2-Q3, opzionali) decidono la griglia: ogni posizione parte mezza casella più indietro.</p><p><b>Mai due auto sulla stessa casella:</b> nella stessa corsia due auto stanno ad almeno 1 casella una dall'altra. Per superare l'auto davanti ti sposti in una corsia libera (lo fa in automatico quando conviene) e <b>ogni sorpasso costa mezza casella</b> di movimento. Se non c'è corsia libera resti dietro. Le carte (Sorpasso Azzardato, Cambio di Traiettoria, Difesa Impenetrabile, ecc.) funzionano come prima, ma nessuna carta lascia due auto nella stessa casella.</p>`)}
- ${sec("🛞 Gomme e box",`<p>Tre mescole: <b>S</b> (morbida) +6 al 1° giro poi +4, ma dura solo 3 giri; <b>M</b> (media) +5 al 1° giro poi +4, dura 4 giri (al 5° scende a +1); <b>H</b> (dura) +4 costante e dura 6 giri. Oltre la durata la gomma crolla. Le tattiche più forti sono <b>S→M→S</b> (2 soste) e <b>M→H</b> (1 sosta). Al primo round scegli la strategia: <i>2 gomme</i> (M→H, 1 sosta), <i>3 gomme</i> (S→M→S, 2 soste) o <i>libera</i> (decidi tu ogni box).</p><p>Per fermarti spunta <b>Box al prossimo traguardo</b> e scegli la gomma da montare. Ai box l'auto resta ferma qualche round e poi si tira un dado per la ripartenza. Se <b>entrambe</b> le auto della stessa scuderia entrano insieme, la seconda resta ferma un round in più.</p>`)}
- ${sec("⚡ Guida, corsie e partenza",`<p>A ogni nuovo giro scegli la modalità: <b>PUSH</b> (+1 ora, −1 al giro dopo), <b>NORMALE</b>, <b>RISPARMIO</b> (−1 ora, +1 al giro dopo). La <b>corsia</b> (sinistra/centro/destra o AUTO) cambia la scia e il passo, con il valore previsto accanto a ogni pulsante.</p><p>🚀 Le <b>carte di partenza</b> (Partenza a Razzo e Buona Partenza) sono le uniche che <b>saltano</b> gli avversari davanti anche a caselle piene. Il menu pilota mostra sempre il giro della gomma in uso, anche se hai programmato il box.</p><p>Al via ogni pilota ha una <b>carta partenza</b> obbligatoria (Partenza a Razzo +4, Buona Partenza +2, Partiti +1, Partenza Regolare 0, Spegnimento al Via: un avversario a caso fa metà passo al primo round, Jump Start: +1 ma paga −5 più avanti) che si usa da sola.</p>`)}
+ ${sec("🛞 Gomme e box",`<p>Tre mescole: <b>S</b> (morbida) +6 al 1° giro poi +4, ma dura solo 3 giri; <b>M</b> (media) +5 al 1° giro poi +4, dura 4 giri (al 5° scende a +1); <b>H</b> (dura) +4 costante e dura 6 giri. Oltre la durata la gomma crolla. Le tattiche più forti sono <b>S→M→S</b> (2 soste) e <b>M→H</b> (1 sosta). Al primo round scegli la strategia: <i>2 gomme</i> (M→H, 1 sosta), <i>3 gomme</i> (S→M→S, 2 soste) o <i>libera</i> (decidi tu ogni box).</p><p>Per fermarti spunta <b>Box al prossimo traguardo</b> e scegli la gomma da montare. Ai box l'auto resta ferma qualche round e poi si tira un dado per la ripartenza. Se <b>entrambe</b> le auto della stessa scuderia entrano insieme, la seconda resta ferma un round in più. Quando più auto escono dai box insieme, escono in fila indiana (1 casella una dall'altra, la prima dal punto di uscita normale) e le auto in pista si spostano di corsia per fare spazio: nessuna aspetta un varco. Le carte che colpiscono (tranne Spegnimento al Via, Calo di Potenza, Sosta Lenta e DRS Guasto) bersagliano solo i primi 10.</p>`)}
+ ${sec("⚡ Guida, corsie e partenza",`<p>A ogni nuovo giro scegli la modalità: <b>PUSH</b> (+1 ora, −1 al giro dopo), <b>NORMALE</b>, <b>RISPARMIO</b> (−1 ora, +1 al giro dopo). La <b>corsia</b> (sinistra/centro/destra o AUTO) cambia la scia e il passo, con il valore previsto accanto a ogni pulsante.</p><p>🚀 Le <b>carte di partenza</b> (Partenza a Razzo e Buona Partenza) sono le uniche che <b>saltano</b> gli avversari davanti anche a caselle piene. Il menu pilota mostra sempre il giro della gomma in uso, anche se hai programmato il box.</p><p>Al via ogni pilota ha una <b>carta partenza</b> obbligatoria (Partenza a Razzo +4, Buona Partenza +2, Partiti +1, Partenza Regolare 0, Spegnimento al Via: un pilota a caso, anche il tuo, fa metà passo al primo round, Jump Start: +1 ma paga −5 più avanti) che si usa da sola.</p>`)}
  ${sec("🃏 Le carte",`<p>Al via hai solo le carte di partenza, poi si pescano 2 carte a ogni nuovo giro; puoi giocare <b>1 carta per turno</b> (clicca o trascina su una tua auto in pista).</p><ul>
  <li>🎯 <b>Sorpasso Azzardato</b>: attacchi chi è a 1 casella davanti, dado pari = sorpasso, dispari = fallisce: tu perdi 1 casella e l'avversario ne guadagna 1.</li>
  <li>↩️ <b>Cambio di Traiettoria</b>: se sei stato superato torni davanti; ti viene chiesto quando serve.</li>
- <li>🚧 <b>Track Limits</b> −6 caselle e 💥 <b>Errore</b> −10 a un avversario (bersaglio con d20).</li>
+ <li>🚧 <b>Track Limits</b> −6 caselle e 💥 <b>Errore</b> −10 a un pilota a caso tra i primi 10 (bersaglio con d10).</li>
  <li>⭐ <b>Talento Naturale</b> +3 OVR fino a fine gara · 💪 <b>Fiducia</b> +1 passo per tutta la gara.</li>
  <li>🛞 <b>Degrado Gomme Extra</b> −2 passi per un giro · 🔧 <b>Problemi Meccanici</b> (avversario ai box) · 🛡️ <b>Difesa Impenetrabile</b> (nessuno ti passa).</li>
  <li>🚨 <b>Safety Car</b>: auto compattate a 0,5 caselle in ordine di gara · 💣 <b>Incidente</b>: piloti eliminati a caso (dadi).</li>
@@ -1653,4 +1701,4 @@ let pref="1";try{pref=localStorage.getItem("f1_3d")||"1"}catch(e){}
 if(pref==="1")V.set(true);
 return V})();
 
-</script></body></html>
+</script><script>(function(){var t=document.getElementById("turn");if(!t||!document.body.classList.contains("mob"))return;new MutationObserver(function(){if(!t.hidden){var m=document.querySelector(".stage");if(m)window.scrollTo({top:m.getBoundingClientRect().top+window.scrollY-4})}}).observe(t,{attributes:true,attributeFilter:["hidden"]})})();</script></body></html>
