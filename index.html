@@ -263,6 +263,7 @@ body.mob:has(#turn:not([hidden])) #mstrip{display:none}
 <div class="c" id="endbar" hidden></div>
 <div id="ov" hidden></div><div id="hitfx"></div><div id="dice"></div>
 <div id="fx"></div>
+<div id="verfoot" style="text-align:center;margin:18px 0 12px;font-family:var(--f1);font-size:10px;letter-spacing:1.5px;color:var(--mut)">VERSIONE · ULTIMA MODIFICA 11/11/2026 · USCITA BOX CASELLA 6</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const MOBILE=false;
@@ -453,7 +454,7 @@ function mv(c,order){
  const H=isH(c.pi);
  if(c.pit){c.pit--;c.bx=S.round;const k=c.pn-c.pit;let t=`fermo ai box, turno ${k}`;say(`🛠 ${c.code} fermo ai box (turno ${k})`);
   if(!c.pit&&!c.dd){c.dd=1;const a=c.dnum||R(6),b=R(6);c.dnum=0;if(H)(S.rel=S.rel||[]).push([c.code,a,b]);/* i dadi di rilascio si mostrano insieme a fine round */t+=` · dado: detto ${a}, uscito ${b}`;say(`🎲 ${c.code} rilascio: ha detto ${a}, dado ${b} → ${a==b&&!c.bpf?"rilascio pericoloso, +1 turno fermo":"via libera"}`);if(a==b&&!c.bpf){c.pit=1;c.pn++}}
-  if(!c.pit){const k=pitExit(c);c.tyre=c.nx;c.ts=L;c.wear=0;c.tp=0;c.pushed=0;c.gg=0;if(k>0){c.lm=0;c.lmSet=0}const fl=k>0?`, in fila indiana ${fm(k*CFG.GAP)} caselle dietro il punto di uscita`:"";t+=` → riparte con ${c.nx}${fl}`;say(`🛠 ${c.code} riparte con gomma ${c.nx}${fl}`)}
+  if(!c.pit){const k=pitExit(c);c.tyre=c.nx;c.ts=L;c.wear=0;c.tp=0;c.pushed=0;c.gg=0;if(k>0){c.lm=0;c.lmSet=0}const fl=k>0?`, in fila indiana ${fm(k*CFG.GAP)} caselle dietro la casella 6 (fine pit lane)`:"";t+=` → riparte con ${c.nx}${fl}`;say(`🛠 ${c.code} riparte con gomma ${c.nx}${fl}`)}
   c.ds=0;S.mv.push([c,0,t]);return}
  const want=(c.fpr&&S.round>=c.fpr)||c.hp||(!isH(c.pi)&&c.si<c.pl.length-1&&lapOf(c.dist)>=c.pls[c.si]);
  let a=null,g=1e9;for(const o of order){if(o===c||o.ret||o.fin)continue;const d=o.sd-c.sd;if(d>=0&&d<g){g=d;a=o}}
@@ -480,9 +481,9 @@ function mv(c,order){
   c.nx=c.nxs||c.pl[c.si+1]||tyreFor(c);c.nxs=null;c.pl[c.si+1]=c.nx;c.si++;c.stops++;c.bx=S.round;c.fpr=0;c.hp=0;t.push("entra ai box");say(`🛠 ${c.code} entra ai box al traguardo (${why}): fermo ${c.pit} turni, poi monta ${c.nx}`)}}
  if(c.dist>=0&&Math.floor(nd/40)>Math.floor(c.dist/40)){if(c.gg>0){c.gg--;c.wear--}c.tp=c.lm>0?1:c.lm<0?-1:0;if(H&&c.tp>0)fx(c,"bad",`${c.code}: Push, gomma −1 al giro dopo`);if(H&&c.tp<0)fx(c,"good",`${c.code}: Risparmio, gomma +1 al giro dopo`)}
   c.ds=nd-c.dist;["hT","pL","dG"].forEach(q=>{if(c[q]>0)c[q]-=c.ds});c.dist=nd;S.mv.push([c,c.ds,t.join(", ")])}
-// Uscita dai box in fila indiana: l'auto esce dal punto di uscita normale (o in coda dietro, 1 casella una dall'altra) nella corsia centrale.
+// Uscita dai box in fila indiana: la prima auto esce alla casella 6 (fine pit lane); le altre che escono con lei si mettono dietro, 1 casella una dall'altra, nella corsia centrale.
 // Le auto in pista che la ostacolano si spostano di corsia (sinistra/destra); se non possono, l'auto in uscita si mette più indietro. Non si aspetta mai un varco.
-function pitExit(c){const B=c.dist,G=CFG.GAP,E=1e-6,oth=()=>S.cars.filter(o=>o!==c&&onT(o)),
+function pitExit(c){const B=Math.round(c.dist/40)*40+CFG.PIT_EXIT,G=CFG.GAP,E=1e-6,oth=()=>S.cars.filter(o=>o!==c&&onT(o)),
  free=(o,ln)=>!oth().some(q=>q!==o&&q.lane===ln&&Math.abs(wrp(q.dist-o.dist))<G-E);
  for(let k=0;k<80;k++){const p=B-k*G,bl=oth().filter(o=>o.lane===1&&Math.abs(wrp(o.dist-p))<G-E);
   if(bl.some(o=>o.xq===S.round))continue;
@@ -624,7 +625,7 @@ function buildMap(){
  const arcs=(o,sw,ex)=>{const R=r+o;return`<path d="M${cx+a} ${cy+R} A${R} ${R} 0 0 0 ${cx+a} ${cy-R} M${cx-a} ${cy-R} A${R} ${R} 0 0 0 ${cx-a} ${cy+R}" fill="none" stroke-width="${sw}" ${ex}/>`};
  const kerb=o=>arcs(o,6,'stroke="#f4f4f4"')+arcs(o,6,'stroke="#d8120b" stroke-dasharray="7 7"');
  const zone=(c0,c1)=>{let p=[];for(let c=c0;c<=c1;c+=.5)p.push(xy(c,1).map(v=>v.toFixed(1)).join(","));const m=xy((c0+c1)/2,1,-40);return`<polyline points="${p.join(" ")}" fill="none" stroke="#2ee87a" stroke-width="54" opacity=".22"/><polyline points="${p.join(" ")}" fill="none" stroke="#2ee87a" stroke-width="2" stroke-dasharray="3 9" opacity=".8"/><text x="${m[0]}" y="${m[1]+3}" text-anchor="middle" font-size="9" font-weight="700" fill="#2ee87a" font-family="Orbitron,sans-serif" letter-spacing="2">DRS</text>`};
- const[f1x,f1y]=xy(0,1,-27),[f2x,f2y]=xy(0,1,27),[px0]=xy(.4,1),[px1]=xy(5,1);
+ const[f1x,f1y]=xy(0,1,-27),[f2x,f2y]=xy(0,1,27),[px0]=xy(.4,1),[px1]=xy(6,1);
  let h=`<defs><pattern id="gr" width="44" height="44" patternUnits="userSpaceOnUse" patternTransform="rotate(28)"><rect width="44" height="22" fill="#1b5236"/><rect y="22" width="44" height="22" fill="#21603f"/></pattern><radialGradient id="vg" cx="50%" cy="50%" r="72%"><stop offset="55%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity=".6"/></radialGradient><pattern id="cw" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#262a35"/><circle cx="1.5" cy="1.5" r="1.1" fill="#e10600"/><circle cx="4.5" cy="4" r="1.1" fill="#f2f2f2"/><circle cx="4.5" cy="1" r=".9" fill="#00e5ff"/><circle cx="1.5" cy="4.5" r=".9" fill="#ffd23f"/></pattern></defs><g id="world">`;
  h+=`<rect width="900" height="430" rx="8" fill="url(#gr)"/>`+rc(0,128,"#a89162",'opacity=".55"')+rc(64,3,"#dfe2e8")+rc(68,4,"#e10600",'stroke-dasharray="12 12"');
  h+=`<rect x="250" y="6" width="400" height="20" rx="3" fill="url(#cw)" stroke="#3a3f4f"/><rect x="250" y="404" width="400" height="20" rx="3" fill="url(#cw)" stroke="#3a3f4f"/>`;
@@ -640,7 +641,7 @@ function buildMap(){
  h+=`<g id="scb" style="display:none"><rect x="${cx-100}" y="8" width="200" height="26" rx="3" fill="#ffd23f"/><text x="${cx}" y="26" text-anchor="middle" font-size="12" font-weight="700" fill="#111" font-family="Orbitron,sans-serif" letter-spacing="2">SAFETY CAR</text></g>`;
  $("map").innerHTML=h;
  M.els={};S.cars.forEach(c=>{const e=$("car-"+c.code);e.onclick=()=>selCar(c.code);e.ondragover=ev=>ev.preventDefault();e.ondrop=ev=>{ev.preventDefault();dropCard(ev.dataTransfer.getData("text"),c.code)};M.els[c.code]=e});M.first=1}
-const PITA=.9,PITB=4.3,pitP=c=>c.pit>0&&!c.ret&&!c.fin?(c.pn>1?Math.min(1,Math.max(0,(c.pn-c.pit)/(c.pn-1))):.5):-1;
+const PITA=.9,PITB=6,pitP=c=>c.pit>0&&!c.ret&&!c.fin?(c.pn>1?Math.min(1,Math.max(0,(c.pn-c.pit)/(c.pn-1))):.5):-1;
 function carXY(c,dist,lane,k,o=0){const cell=k>=0?Math.max(.45,PITA+k*(PITB-PITA)-o):dist,ln=k>=0?1:lane,ex=k>=0?48:0,[x,y]=xy(cell,ln,ex),[x2,y2]=xy(cell+.08,ln,ex);return[x,y,Math.atan2(y2-y,x2-x)*180/Math.PI]}
 function setCar(c,x,y,an,tr){const e=M.els[c.code];if(!e)return;const pv=e._a;if(pv!=null){while(an-pv>180)an-=360;while(an-pv<-180)an+=360}e._a=an;const ro=e.querySelector(".rot");e.style.transition=tr;ro.style.transition=tr;e.style.transform=`translate(${x.toFixed(1)}px,${y.toFixed(1)}px)`;ro.style.transform=`rotate(${an.toFixed(1)}deg)`}
 function drawMap(durOv){
@@ -665,7 +666,7 @@ function drawMap(durOv){
 function near(c){let a=null,g=1e9;for(const o of live()){if(o===c)continue;const d=o.dist-c.dist;if(d>=0&&d<g){g=d;a=o}}return[a,g]}
 function lanePrev(c){const pf=pref(cellOf(c.dist)),[a,g]=near(c);return[0,1,2].map(l=>(a&&g<5?(a.aS==lapOf(a.dist)?-1:(a.lane==l?1:0)):0)+(pf==l?1:0))}
 function drsEl(c){const[a,g]=near(c);return !!a&&drs(cellOf(c.dist))&&g<=7&&!(c.dG>0)}
-function pitPrev(c){const loss=(S.sc?1:(c.bp?1:2))*4;return 1+live().filter(o=>o!==c&&o.dist>c.dist-loss).length}
+function pitPrev(c){const loss=(S.sc?1:(c.bp?1:2))*4;return 1+live().filter(o=>o!==c&&o.dist>c.dist+CFG.PIT_EXIT-loss).length}
 function radio(m){const o=[];m.forEach(c=>{if(c.pit)return;if(c.lmLap!==lapOf(c.dist))o.push(`${c.code}: «Nuovo giro: scegli la modalità di guida!»`);const bh=live().filter(x=>x!==c&&x.dist<=c.dist&&c.dist-x.dist<2.5).sort((x,y)=>y.dist-x.dist)[0];
  if(c.fpr||c.hp||(c.si<c.pl.length-1&&lapOf(c.dist)>=c.pls[c.si]))o.push(`${c.code}: «Box box! Rientri al traguardo»`);else if(ag(c)>=8)o.push(`${c.code}: «Le gomme sono al limite…»`);
  if(bh&&bh.pi!=c.pi)o.push(`${c.code}: «${bh.code} è a ${fm(c.dist-bh.dist)} caselle, attento!»`);
@@ -737,7 +738,7 @@ function tipFor(k,m){const best=m[0],rk=best?cls().indexOf(best)+1:1,ahead=Math.
 /* ---------- CONFIGURAZIONE: tutti i dati modificabili stanno qui ---------- */
 const CFG={
  BUDGET:246,          // budget iniziale per giocatore (milioni)
- SEASON_RACES:23,GAP:1,     // gare per stagione in carriera
+ SEASON_RACES:23,GAP:1,PIT_EXIT:6,     // gare per stagione in carriera
  OVR_MAX:99,          // OVR massimo di piloti e monoposto
  BONUS:3,             // bonus +3 del sorteggio casuale (si risorteggia a ogni gara nel Draft)
  RB:[[15,.5],[25,1],[35,1.5],[45,2],[55,2.5],[65,3]],   // rimbalzo: [distacco dal leader in caselle, bonus passo]
@@ -993,7 +994,7 @@ function showHelp(back){
  ov(`<h3>📖 COME SI GIOCA</h3><div class="helpw">
  ${sec("🎯 Obiettivo",`<p>Ogni giocatore guida una <b>scuderia</b>: 1 monoposto e 2 piloti. Vince chi porta i suoi piloti più in alto in classifica. In una gara si fanno <b>10 giri</b> (40 caselle l'uno, 400 in tutto); la classifica finale dà punti come in F1: <b>25-18-15-12-10-8-6-4-2-1</b> ai primi 10. Con più gare si gioca un campionato piloti e costruttori.</p>`,1)}
  ${sec("🏁 Come funziona un round",`<p>La gara avanza a <b>round</b>. Prima del round i giocatori umani fanno le loro scelte, poi tutte le auto si muovono insieme. Il passo di ogni auto dipende da: il <b>passo base</b> (media OVR pilota + monoposto: 1 casella a media 80, +0,2 per ogni punto, a mezze caselle, da 0,5 a 5), gomme e usure, modalità di guida, scia/DRS, corsia e dadi. Nei turni vedi il consiglio della radio ("📻") e il riquadro dei suggerimenti sulle carte.</p><p>Le <b>qualifiche</b> (Q1-Q2-Q3, opzionali) decidono la griglia: ogni posizione parte mezza casella più indietro.</p><p><b>Mai due auto sulla stessa casella:</b> nella stessa corsia due auto stanno ad almeno 1 casella una dall'altra. Per superare l'auto davanti ti sposti in una corsia libera (lo fa in automatico quando conviene) e <b>ogni sorpasso costa mezza casella</b> di movimento. Se non c'è corsia libera resti dietro. Le carte (Sorpasso Azzardato, Cambio di Traiettoria, Difesa Impenetrabile, ecc.) funzionano come prima, ma nessuna carta lascia due auto nella stessa casella.</p>`)}
- ${sec("🛞 Gomme e box",`<p>Tre mescole: <b>S</b> (morbida) +6 al 1° giro poi +4, ma dura solo 3 giri; <b>M</b> (media) +5 al 1° giro poi +4, dura 4 giri (al 5° scende a +1); <b>H</b> (dura) +4 costante e dura 6 giri. Oltre la durata la gomma crolla. Le tattiche più forti sono <b>S→M→S</b> (2 soste) e <b>M→H</b> (1 sosta). Al primo round scegli la strategia: <i>2 gomme</i> (M→H, 1 sosta), <i>3 gomme</i> (S→M→S, 2 soste) o <i>libera</i> (decidi tu ogni box).</p><p>Per fermarti spunta <b>Box al prossimo traguardo</b> e scegli la gomma da montare. Ai box l'auto resta ferma qualche round e poi si tira un dado per la ripartenza. Se <b>entrambe</b> le auto della stessa scuderia entrano insieme, la seconda resta ferma un round in più. Quando più auto escono dai box insieme, escono in fila indiana (1 casella una dall'altra, la prima dal punto di uscita normale) e le auto in pista si spostano di corsia per fare spazio: nessuna aspetta un varco. Le carte che colpiscono (tranne Spegnimento al Via, Calo di Potenza, Sosta Lenta e DRS Guasto) bersagliano solo i primi 10.</p>`)}
+ ${sec("🛞 Gomme e box",`<p>Tre mescole: <b>S</b> (morbida) +6 al 1° giro poi +4, ma dura solo 3 giri; <b>M</b> (media) +5 al 1° giro poi +4, dura 4 giri (al 5° scende a +1); <b>H</b> (dura) +4 costante e dura 6 giri. Oltre la durata la gomma crolla. Le tattiche più forti sono <b>S→M→S</b> (2 soste) e <b>M→H</b> (1 sosta). Al primo round scegli la strategia: <i>2 gomme</i> (M→H, 1 sosta), <i>3 gomme</i> (S→M→S, 2 soste) o <i>libera</i> (decidi tu ogni box).</p><p>Per fermarti spunta <b>Box al prossimo traguardo</b> e scegli la gomma da montare. Ai box l'auto resta ferma qualche round e poi si tira un dado per la ripartenza. Se <b>entrambe</b> le auto della stessa scuderia entrano insieme, la seconda resta ferma un round in più. Quando più auto escono dai box insieme, escono in fila indiana (1 casella una dall'altra, la prima alla casella 6, fine della pit lane) e le auto in pista si spostano di corsia per fare spazio: nessuna aspetta un varco. Le carte che colpiscono (tranne Spegnimento al Via, Calo di Potenza, Sosta Lenta e DRS Guasto) bersagliano solo i primi 10.</p>`)}
  ${sec("⚡ Guida, corsie e partenza",`<p>A ogni nuovo giro scegli la modalità: <b>PUSH</b> (+1 ora, −1 al giro dopo), <b>NORMALE</b>, <b>RISPARMIO</b> (−1 ora, +1 al giro dopo). La <b>corsia</b> (sinistra/centro/destra o AUTO) cambia la scia e il passo, con il valore previsto accanto a ogni pulsante.</p><p>🚀 Le <b>carte di partenza</b> (Partenza a Razzo e Buona Partenza) sono le uniche che <b>saltano</b> gli avversari davanti anche a caselle piene. Il menu pilota mostra sempre il giro della gomma in uso, anche se hai programmato il box.</p><p>Al via ogni pilota ha una <b>carta partenza</b> obbligatoria (Partenza a Razzo +4, Buona Partenza +2, Partiti +1, Partenza Regolare 0, Spegnimento al Via: un pilota a caso, anche il tuo, fa metà passo al primo round, Jump Start: +1 ma paga −5 più avanti) che si usa da sola.</p>`)}
  ${sec("🃏 Le carte",`<p>Al via hai solo le carte di partenza, poi si pescano 2 carte a ogni nuovo giro; puoi giocare <b>1 carta per turno</b> (clicca o trascina su una tua auto in pista).</p><ul>
  <li>🎯 <b>Sorpasso Azzardato</b>: attacchi chi è a 1 casella davanti, dado pari = sorpasso, dispari = fallisce: tu perdi 1 casella e l'avversario ne guadagna 1.</li>
@@ -1585,7 +1586,7 @@ function build(){
   const rf=box(404,1.4,46,mat("#d9dce4"),0,40,s*214);[[-198],[198]].forEach(([x])=>{box(2,40,2,mat("#555a68"),x,20,s*194);box(2,40,2,mat("#555a68"),x,20,s*232)});
   const nm=label(s>0?"CARD RACER GP":"F1 CARD RACER","#ffd23f",150,24);nm.position.set(0,46,s*190);scn.add(nm)});
  /* corsia box */
- const px0=xy(.4,1)[0]-cx,px1=xy(5,1)[0]-cx,pw=px1-px0,pz=cy+RR+47-cy;
+ const px0=xy(.4,1)[0]-cx,px1=xy(6,1)[0]-cx,pw=px1-px0,pz=cy+RR+47-cy;
  box(pw,.8,22,mat("#23252d"),(px0+px1)/2,.7,pz);box(pw,1,1.4,mat("#ffd23f"),(px0+px1)/2,1.1,pz-11);
  for(let i=0;i<10;i++){const gx=px0+pw/10*(i+.5);box(pw/10-3,9,10,mat("#c8cbd6"),gx,4.5,pz+16);box(pw/10-7,6,.6,mat(COL[i]),gx,4.2,pz+10.8)}
  const pl=label("PIT LANE","#ffd23f",70,14);pl.position.set((px0+px1)/2,18,pz+20);scn.add(pl);
