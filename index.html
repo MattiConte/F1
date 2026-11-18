@@ -244,6 +244,11 @@ body.mob .ctl>i.mut{flex:1 1 100%}
 body.mob:has(#turn:not([hidden])) #map{max-height:calc(100dvh - 44vh - 150px)!important}
 body.mob:has(#turn:not([hidden])) #v3{height:calc(100dvh - 44vh - 190px);min-height:150px}
 body.mob:has(#turn:not([hidden])) #mstrip{display:none}
+
+.rfc{border:1px solid var(--bd);border-radius:8px;padding:8px 10px;margin:10px 0}
+.rfo{display:block;padding:7px 6px;border-radius:6px;cursor:pointer;line-height:1.35}
+.rfo:hover{background:rgba(255,255,255,.06)}.rfo input{margin-right:6px}
+.rfo.best{border-left:3px solid #e10600;background:rgba(225,6,0,.07)}
 </style><link rel="manifest" href="manifest-f1pc.json"><meta name="theme-color" content="#e10600"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="F1 Card Racer"><script>if("serviceWorker" in navigator)addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})</script></head><body>
 <div class="mast"><div class="lg"><b>F1</b><span>CARD RACER</span></div><div style="display:flex;gap:16px;align-items:center"><span id="rm" class="mut" style="font-weight:700;color:#ffd23f"></span><span id="bud"></span><span id="hdr"></span><div class="live"><i></i>LIVE</div></div></div>
 <div class="tick" id="tick"><b>LIVE</b><span>In attesa del via…</span></div>
@@ -263,7 +268,7 @@ body.mob:has(#turn:not([hidden])) #mstrip{display:none}
 <div class="c" id="endbar" hidden></div>
 <div id="ov" hidden></div><div id="hitfx"></div><div id="dice"></div>
 <div id="fx"></div>
-<div id="verfoot" style="text-align:center;margin:18px 0 12px;font-family:var(--f1);font-size:10px;letter-spacing:1.5px;color:var(--mut)">VERSIONE · ULTIMA MODIFICA 16/11/2026</div>
+<div id="verfoot" style="text-align:center;margin:18px 0 12px;font-family:var(--f1);font-size:10px;letter-spacing:1.5px;color:var(--mut)">VERSIONE · ULTIMA MODIFICA 17/11/2026</div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 const MOBILE=false;
@@ -275,7 +280,7 @@ const DRV=[["Norris",94,0],["Piastri",92,0],["Russell",92,1],["Antonelli",89,1],
 const BASE_MIN=.5,BASE_MAX=5,BASE_FROM=80,BASE_K=.2,baseStep=av=>Math.min(BASE_MAX,Math.max(BASE_MIN,Math.round((1+(av-BASE_FROM)*BASE_K)*2)/2));   // passo base: 1 casella a media 80, +0.2 per ogni punto, a mezze caselle, min 0.5 · max 5
 const TY={S:[6,4,4,-4,-14,-24,-34,-44,-54,-64],M:[5,4,4,4,1,-4,-9,-14,-19,-24],H:[4,4,4,4,4,4,0,-6,-12,-18]};   // bonus/malus per giro di vita della gomma (1°…10° giro). S: +6 poi +4, dura 3 giri · M: +5 poi +4, dura 4 giri (5° giro +1) · H: +4 costante, dura 6 giri
 // MAZZO DA 300 CARTE: a ogni gara se ne pescano ~190 (10 giocatori × (1 + 9 giri × 2)), quindi ogni gara usa un sottoinsieme diverso del mazzo
-const CARDS={"Sorpasso Azzardato":37,"Cambio di Traiettoria":38,"Track Limits":22,"Errore":14,"Talento Naturale":22,"Degrado Gomme Extra":14,"Fiducia":5,"Problemi Meccanici":3,"Difesa Impenetrabile":10,"Safety Car":1,"Incidente":2,"Hammer Time":15,"Box Perfetto":23,"Gestione Gomme":23,"Spionaggio":23,"Aria Sporca":14,"Ricorso":14,"Virtual Safety Car":1,"Bandiera Rossa":1,"Calo di Potenza":8,"Sosta Lenta":5,"DRS Guasto":5};
+const CARDS={"Sorpasso Azzardato":37,"Cambio di Traiettoria":37,"Track Limits":22,"Errore":14,"Talento Naturale":22,"Degrado Gomme Extra":14,"Fiducia":5,"Problemi Meccanici":3,"Difesa Impenetrabile":10,"Safety Car":1,"Incidente":2,"Hammer Time":15,"Box Perfetto":23,"Gestione Gomme":23,"Spionaggio":23,"Aria Sporca":14,"Ricorso":14,"Virtual Safety Car":1,"Bandiera Rossa":2,"Calo di Potenza":8,"Sosta Lenta":5,"DRS Guasto":5};
 const COL=["#ff8000","#27f4d2","#5b8def","#e8002d","#64c4ff","#8fa6ff","#2fb584","#b6babd","#6fe06f","#ff87bc"];
 const lapOf=d=>Math.max(1,Math.floor(d/40)+1),cellOf=d=>((Math.floor(d)%40)+40)%40;
 const pref=c=>c%8<3?-1:(((c>>3)+(c%8>5?1:0))%3),drs=c=>c<=5||(c>=20&&c<=26);
@@ -283,7 +288,7 @@ const ag=c=>Math.min(10,Math.max(1,Math.floor(lapOf(c.dist)-c.ts+1+c.wear-(c.pit
 const tyb=c=>`<span class="ty ${c.tyre}">${c.tyre}</span> giro ${ag(c)}/10<i class="wb"><u style="width:${ag(c)*10}%"></u></i><b>${fs(md(c))}</b>${c.gg>0?` <span class="ty" style="background:#00e5ff;width:auto;padding:0 5px">🧊${c.gg}</span>`:""}`;
 let S,timer=null;const NH=()=>+$("nh").value,isH=i=>!S.ff&&i<NH();
 const CAM="Cambio di Traiettoria";let SPT=null,SCF=5,DS={e:0,o:0},QUIET=0,AUTO=true,SND=true,CMR=0,DQ=[],DB=0,AC=null;const FXH=[];
-const CD={"Sorpasso Azzardato":["🎯","Attacca chi è a 1 casella davanti: dado pari = sorpasso, dispari = fallisce (tu −1 casella, lui +1)"],"Cambio di Traiettoria":["↩️","Se sei stato superato, torna davanti"],"Track Limits":["🚧","Un pilota a caso tra i primi 10 perde 6 caselle"],"Errore":["💥","Un pilota a caso tra i primi 10 perde 10 caselle"],"Talento Naturale":["⭐","+3 overall fino a fine gara"],"Degrado Gomme Extra":["🛞","Un pilota a caso tra i primi 10: −2 passi per un giro"],"Fiducia":["💪","+1 passo fisso per tutta la gara"],"Problemi Meccanici":["🔧","Un pilota a caso tra i primi 10 deve fermarsi ai box"],"Difesa Impenetrabile":["🛡️","Nessuno ti supera in questo round"],"Safety Car":["🚨","Safety Car in pista"],"Incidente":["💣","Elimina 1-3 piloti a caso tra i primi 10 (dado)"],"Hammer Time":["🔨","+2 passi per un giro (40 caselle)"],"Box Perfetto":["⏱️","La sosta ai box dura sempre 1 solo round, senza penalità doppio pit/rilascio (non con SC/VSC)"],"Gestione Gomme":["🧊","Per 1 giro la gomma non si consuma"],"Spionaggio":["🕵️","Vedi le carte di un avversario a tua scelta"],"Aria Sporca":["🌫️","Chi ti segue (a meno di 5 caselle) fino a fine giro non prende la scia e fa −1 passo"],"Ricorso":["⚖️","Scatta da sola: annulla una carta avversaria che ti colpisce"],"Virtual Safety Car":["🟨","Tutti avanzano di 0,5 caselle per 2 round, come la Safety Car"],"Bandiera Rossa":["🔴","Gara sospesa: si riparte dalla griglia, giri e posizioni mantenuti, gomme nuove gratis (non al 1° giro)"],"Calo di Potenza":["📉","Pilota a caso tra i primi 10 (anche il tuo compagno): −1 passo per un giro"],"Sosta Lenta":["🐌","Pilota a caso tra i primi 10 (anche il tuo compagno): la prossima sosta dura 1 round in più"],"DRS Guasto":["🚫","Pilota a caso tra i primi 10 (anche il tuo compagno): niente DRS per un giro"]};
+const CD={"Sorpasso Azzardato":["🎯","Attacca chi è a 1 casella davanti: dado pari = sorpasso, dispari = fallisce (tu −1 casella, lui +1)"],"Cambio di Traiettoria":["↩️","Se sei stato superato, torna davanti"],"Track Limits":["🚧","Un pilota a caso tra i primi 10 perde 6 caselle"],"Errore":["💥","Un pilota a caso tra i primi 10 perde 10 caselle"],"Talento Naturale":["⭐","+3 overall fino a fine gara"],"Degrado Gomme Extra":["🛞","Un pilota a caso tra i primi 10: −2 passi per un giro"],"Fiducia":["💪","+1 passo fisso per tutta la gara"],"Problemi Meccanici":["🔧","Un pilota a caso tra i primi 10 deve fermarsi ai box"],"Difesa Impenetrabile":["🛡️","Nessuno ti supera in questo round"],"Safety Car":["🚨","Safety Car in pista"],"Incidente":["💣","Elimina 1-3 piloti a caso tra tutti i 20 (dado)"],"Hammer Time":["🔨","+2 passi per un giro (40 caselle)"],"Box Perfetto":["⏱️","La sosta ai box dura sempre 1 solo round, senza penalità doppio pit/rilascio (non con SC/VSC)"],"Gestione Gomme":["🧊","Per 1 giro la gomma non si consuma"],"Spionaggio":["🕵️","Vedi le carte di un avversario a tua scelta"],"Aria Sporca":["🌫️","Chi ti segue (a meno di 5 caselle) fino a fine giro non prende la scia e fa −1 passo"],"Ricorso":["⚖️","Scatta da sola: annulla una carta avversaria che ti colpisce"],"Virtual Safety Car":["🟨","Tutti avanzano di 0,5 caselle per 2 round, come la Safety Car"],"Bandiera Rossa":["🔴","Gara sospesa: si riparte dalla griglia, giri e posizioni mantenuti, gomme nuove gratis e menu per rifare la strategia (non al 1° giro)"],"Calo di Potenza":["📉","Pilota a caso tra i primi 10 (anche il tuo compagno): −1 passo per un giro"],"Sosta Lenta":["🐌","Pilota a caso tra i primi 10 (anche il tuo compagno): la prossima sosta dura 1 round in più"],"DRS Guasto":["🚫","Pilota a caso tra i primi 10 (anche il tuo compagno): niente DRS per un giro"]};
 const STB={"Partenza a Razzo":"+4","Buona Partenza":"+2","Partiti":"+1","Partenza Regolare":"0","Spegnimento al Via":"colpisce chi la riceve: metà passo","Jump Start":"+1 ora, −5 in un giro estratto"},stL=k=>STB[k]?`${k} (${STB[k]})`:k;
 const ICO={
 'Sorpasso Azzardato':'<rect x="4" y="7" width="18" height="18" rx="3"/><circle cx="10" cy="13" r="1.4" fill="#ffd23f" stroke="none"/><circle cx="16" cy="13" r="1.4" fill="#ffd23f" stroke="none"/><circle cx="10" cy="19" r="1.4" fill="#ffd23f" stroke="none"/><circle cx="16" cy="19" r="1.4" fill="#ffd23f" stroke="none"/><path d="M28 16h15M38 10l6 6-6 6" stroke="#2ee87a"/>',
@@ -351,13 +356,49 @@ function tgtO(p){return tgt(10)}
 function parry(t,k,p){const o=t&&S.pl[t.pi];if(!o||!p||o.id==p.id||o.rcOff||k=="Ricorso")return 0;const i=o.hand.indexOf("Ricorso");if(i<0)return 0;
  o.hand.splice(i,1);say(`⚖ G${o.id+1} Ricorso: l'effetto di ${k} su ${t.code} è annullato`);fx(t,"good",`${t.code}: Ricorso, ${k} annullata`);return 1}
 // Bandiera Rossa: gara sospesa e ripartenza da fermi. Giri e ordine restano quelli attuali, la griglia si rifà a 0,5 caselle una dall'altra dal via del giro in corso
-function redFlag(p,k){const l=live().sort((a,b)=>b.dist-a.dist);if(l.length<2)return 0;const mx=l[0].dist,Lr=lapOf(mx);
+function redFlag(p,k){const l=live().sort((a,b)=>b.dist-a.dist);if(l.length<2)return 0;const mx=l[0].dist,Lr=lapOf(mx);S.rfN=(S.rfN||0)+1;S.rfAt=S.round;S.rfH=l.some(c=>isH(c.pi))?1:0;
  l.forEach((c,i)=>{const old=lapOf(c.dist),base=c.dist>mx-40?Lr:old,nd=(base-1)*40-i*.5;
   if(c.pit>0){c.pit=0;c.tyre=c.nx||c.tyre;c.dd=1}   // chi era ai box esce con la gomma già scelta
   c.wear=0;c.tp=0;c.pushed=0;c.gg=0;c.ts=base;       // cambio gomme gratis: stessa mescola, nuova (età 1 dal giro della ripartenza)
-  c.dist=nd;c.lane=i%3;c.pb=null;c.def=0;c.cc=0;c.bx=0;c.hT=c.pL=c.dG=c.aS=0});
+  c.dist=nd;c.lane=i%3;c.pb=null;c.def=0;c.cc=0;c.bx=0;c.hT=c.pL=c.dG=c.aS=0;
+  c.asked=null;c.rfv=S.rfN;c.rfs=c.stops;c.rfL=base;rfApply(c,rfOpts(11-base)[0])});   // strategia rifatta sui giri rimanenti: parte la migliore, chi è umano la può cambiare dal menu
  S.sc=0;S.vsc=0;S.scr=0;S.sorp=[];S.cam=[];
- say(`🃏 G${p.id+1} ${k}: 🔴 BANDIERA ROSSA, gara sospesa. Si riparte da fermi dalla griglia: posizioni e giri attuali (giro ${Lr}/10), auto a ${CFG.SC_GAP} caselle una dall'altra, cambio gomme gratis per tutti (stessa mescola)`);return 1}
+ say(`🃏 G${p.id+1} ${k}: 🔴 BANDIERA ROSSA, gara sospesa. Si riparte da fermi dalla griglia: posizioni e giri attuali (giro ${Lr}/10), auto a ${CFG.SC_GAP} caselle una dall'altra, cambio gomme gratis per tutti e strategia rifatta sui giri rimanenti`);return 1}
+// ---- Bandiera Rossa: strategia rifatta sui giri rimanenti ----
+// valore di un piano = somma dei bonus gomma di ogni giro (tabella TY) meno RF_STOP per ogni sosta. RF_STOP=4 perché sulla gara intera M→H (1 sosta, 41) e S→M→S (2 soste, 45) si equivalgono
+const RF_STOP=4;
+function rfOpts(R){const C=["S","M","H"],st=(t,n)=>{let s=0;for(let i=0;i<n;i++)s+=TY[t][Math.min(9,i)];return s},all=[];
+ C.forEach(a=>all.push({seq:[a],len:[R],k:0,sc:st(a,R)}));
+ if(R>=2)C.forEach(a=>C.forEach(b=>{if(a==b)return;let bs=null;for(let n=1;n<R;n++){const s=st(a,n)+st(b,R-n);if(!bs||s>bs.sc)bs={seq:[a,b],len:[n,R-n],k:1,sc:s}}all.push(bs)}));
+ if(R>=3)C.forEach(a=>C.forEach(b=>C.forEach(c=>{if(a==b||b==c)return;let bs=null;for(let n=1;n<R-1;n++)for(let m=1;n+m<R;m++){const s=st(a,n)+st(b,m)+st(c,R-n-m);if(!bs||s>bs.sc)bs={seq:[a,b,c],len:[n,m,R-n-m],k:2,sc:s}}all.push(bs)})));   // ogni sosta cambia mescola
+ all.forEach(o=>o.net=o.sc-RF_STOP*o.k);all.sort((x,y)=>y.net-x.net||x.k-y.k);
+ const out=[],seen={};[0,1,2].forEach(k=>{let n=0;all.filter(o=>o.k==k).forEach(o=>{const key=o.seq.map((t,j)=>t+o.len[j]).sort().join();if(n>=2||seen[key])return;seen[key]=1;n++;out.push(o)})});   // le 2 migliori per numero di soste, senza doppioni (stessi stint in ordine diverso)
+ out.sort((x,y)=>y.net-x.net||x.k-y.k);return out}
+// applica un piano: mescole, giri dei box (numeri assoluti: box a fine giro), si riparte dalla prima gomma
+function rfApply(c,o){let a=(c.rfL||c.ts)-1;c.pl=o.seq.slice();c.pls=[];o.len.slice(0,-1).forEach(n=>{a+=n;c.pls.push(a)});c.si=0;c.tyre=c.pl[0];c.hp=0;c.nxs=null}
+function rfData(pid){return live().filter(c=>c.pi==pid&&c.rfv===S.rfN).sort((a,b)=>b.dist-a.dist).map(c=>{const R=11-c.rfL;
+ return{code:c.code,name:c.name,ti:c.ti,pos:cls().indexOf(c)+1,L:c.rfL,R,cur:0,opts:rfOpts(R).map(x=>{let a=c.rfL-1;const bx=x.len.slice(0,-1).map(n=>(a+=n));return{txt:x.seq.map((t,j)=>t+" "+x.len[j]+"g").join(" → "),k:x.k,net:x.net,bx}})}})}
+function rfHtml(pid,d){
+ return `<h3>🔴 BANDIERA ROSSA · rifai la strategia${NH()>1?" · G"+(pid+1):""}</h3><p class="mut">Gomme nuove gratis per tutti. Scegli come affrontare i giri rimanenti: ogni piano mostra mescola e giri (<b>g</b>), le soste e il <b>valore</b> = somma dei bonus gomma meno ${RF_STOP} punti per ogni sosta (due round fermi). La ★ è la scelta consigliata.</p>`
+ +d.map(x=>`<div class="rfc"><div><b style="background:${COL[x.ti]};padding:1px 6px;border-radius:3px">${x.code}</b> <b>${x.name}</b> <span class="mut">P${x.pos} · ${x.R} ${x.R==1?"giro":"giri"} da fare (dal giro ${x.L})</span></div>`
+  +x.opts.map((o,i)=>`<label class="rfo${i==x.cur?" best":""}"><input type="radio" name="rf-${x.code}" value="${i}"${i==x.cur?" checked":""}> ${i==0?"★ ":""}<b>${o.txt}</b> · ${o.k==0?"nessuna sosta":o.k+(o.k==1?" sosta":" soste")+" (box a fine giro "+o.bx.join(" e ")+")"} · valore <b class="${o.net>0?"gn":"ls"}">${o.net>0?"+":""}${o.net}</b></label>`).join("")
+  +`<label class="rfo"><input type="radio" name="rf-${x.code}" value="L"> Libera: decido io i box · parto con <select id="rfs-${x.code}">${["S","M","H"].map(t=>`<option>${t}</option>`).join("")}</select></label></div>`).join("")
+ +`<button class="p" id="rfok">✔ Conferma strategia</button>`}
+function rfShow(pid,d,fin){ovp(rfHtml(pid,d));$("rfok").onclick=()=>{const pk={};d.forEach(x=>{const e=document.querySelector(`input[name="rf-${x.code}"]:checked`);if(!e)return;pk[x.code]=e.value=="L"?"L:"+($("rfs-"+x.code)||{value:"M"}).value:e.value});ovx();fin(pk)}}
+// scelta del giocatore (offline, host o comando dal client): vale solo per questa bandiera rossa e finché l'auto non è rientrata ai box
+function rfPick(pid,pk){let n=0;Object.keys(pk||{}).forEach(code=>{const c=S.cars.find(x=>x.code==code);if(!c||c.pi!=pid||c.rfv!==S.rfN||c.ret||c.fin||c.stops!==c.rfs)return;const v=String(pk[code]);
+ if(v[0]=="L"){const t=v.slice(2,3);if(!t||!"SMH".includes(t))return;c.pl=[t];c.pls=[];c.si=0;c.tyre=t;c.hp=0;c.nxs=null;n++}
+ else{const o=rfOpts(11-c.rfL)[+v];if(o){rfApply(c,o);n++}}});
+ if(n){say(`🔴 G${pid+1} rifà la strategia per i giri rimanenti`);render()}return n}
+// mostra i menu ai giocatori umani. Offline: uno alla volta, passandosi il dispositivo. Online: ognuno sul proprio dispositivo, senza fermare la gara
+function rfMenus(done,back){const hs=S.pl.filter(p=>p.id<NH()&&live().some(c=>c.pi==p.id&&c.rfv===S.rfN)).sort((a,b)=>(b.id==S.cur)-(a.id==S.cur));
+ if(!hs.length)return done&&done();
+ if(NET.host&&NET.started){hs.forEach(p=>{const d=rfData(p.id);if(p.id===0)rfShow(0,d,pk=>rfPick(0,pk));else if(NET.conns[p.id]&&NET.conns[p.id].open)toPid(p.id,{t:"rf",d})});return done&&done()}
+ let i=0;const nxt=()=>{
+  if(i>=hs.length){if(back!=null&&hs.length>1&&hs[hs.length-1].id!=back){ovp(`<h3>📱 Passa il dispositivo</h3><p>Ora tocca a <b>G${back+1}</b>.</p><button class="p" id="rfb">Sono G${back+1}: continua</button>`);$("rfb").onclick=()=>{ovx();done&&done()};return}ovx();return done&&done()}
+  const p=hs[i++],show=()=>rfShow(p.id,rfData(p.id),pk=>{rfPick(p.id,pk);nxt()});
+  if(hs.length>1&&p.id!==S.cur){ovp(`<h3>📱 Passa il dispositivo</h3><p>Bandiera rossa: tocca a <b>G${p.id+1}</b>, gli altri non guardino lo schermo.</p><button class="p" id="rfg">Sono G${p.id+1}: mostra la strategia</button>`);$("rfg").onclick=show}else show()};
+ nxt()}
 // Spionaggio: scelta dell'avversario e mostra la sua mano (solo a chi gioca la carta)
 function spyHtml(t){const h=t.hand.length?t.hand.map(k=>`<div class="row">${(CD[k]||["🃏"])[0]} <b>${k}</b> <small>${(CD[k]||["",""])[1]}</small></div>`).join(""):'<p class="mut">Nessuna carta in mano.</p>';
  return`<h3>🕵️ SPIONAGGIO · G${t.id+1}</h3>${t.st&&t.st.some(Boolean)?`<p>Carte di partenza: ${t.st.filter(Boolean).map(stL).join(", ")}</p>`:""}<p>Mano di G${t.id+1} (${t.hand.length}):</p>${h}<button class="p" onclick="ovx()">Chiudi</button>`}
@@ -420,6 +461,9 @@ function go(q){
  if(S.round==1)S.pl.forEach(p=>{if(!p.st)return;p.d.forEach((x,j)=>{const c=live().find(c=>c.pi==p.id&&c.di==x);if(c&&p.st[j]&&use(p,p.st[j],[c]))p.st[j]=null})});
  S.pl.forEach(p=>{if(isH(p.id))return;const m=live().filter(c=>c.pi==p.id&&!c.pit).sort((a,b)=>b.dist-a.dist);if(!m.length)return;
   for(const k of p.hand)if(use(p,k,m)){p.hand.splice(p.hand.indexOf(k),1);RE.includes(k)&&S.disc.push(k);break}});
+ if(S.rfH&&!q&&!S.ff){S.rfH=0;stop();const w0=S.wait;S.wait=3;return rfMenus(()=>{S.wait=w0;goRest(q);if(AUTO)runAuto()})}   // bandiera rossa giocata da una CPU: prima i menu strategia dei giocatori
+ goRest(q)}
+function goRest(q){
  const order=live().sort((a,b)=>b.dist-a.dist||(b.def===S.round)-(a.def===S.round));order.forEach(c=>c.sd=c.dist);   // a parità di casella si muove prima chi difendeS.pre=S.cars.map(c=>({c,d:c.dist,l:c.lane,p:c.pit>0&&!c.ret&&!c.fin}));
  order.forEach(c=>mv(c,order));
  (S.cam||[]).forEach(({x,a})=>{if(S.sc||x.ret||a.ret)return;if(a.def===S.round){say(`🛡 ${a.code} è protetto dalla Difesa Impenetrabile: ${x.code} non può riprendersi la posizione`);return}if(parry(a,CAM,S.pl[x.pi]))return;{const o0=x.dist;x.dist=dcap(x,Math.max(x.dist,a.dist+1));settle(x,1);dfix(x,o0)}x.cc=S.round;x.ccv=a.code;fx(x,"good",`${x.code} si riprende la posizione su ${a.code}`);say(`↩ ${x.code} supera di nuovo ${a.code} (Cambio di Traiettoria)`)});
@@ -515,7 +559,7 @@ function use0(p,k,m,f,xs){
  case"Difesa Impenetrabile":if(!f&&rk(c)>8)return 0;c.def=S.round;say(`${P}: ${c.code} non superabile in questo round`);return 1;
  case"Safety Car":if((S.sc&&!S.vsc)||(!f&&(R1||rk(c)<10||lapOf(Math.max(...live().map(x=>x.dist)))>8||Math.random()>.4)))return 0;S.sc=1;S.vsc=0;S.scr=0;scBunch();say(`${P}: 🚨 SAFETY CAR in pista`);return 1;
  case"Incidente":{if(!f&&(S.round<3||Math.random()>.15))return 0;const d=R(6),n=Math.ceil(d/2);if(p.id<NH())dice("Incidente · quanti piloti",d);say(`${P}: dado ${d} → ${n} piloti coinvolti (metà, per eccesso)`);
-  for(let i=0;i<n;i++){const[r,t]=tgt(10);if(t){if(parry(t,k,p)){continue}t.ret=1;fx(t,"bad",`${t.code}: eliminato nell'incidente`);hit(t,k,p);say(`💥 bersaglio ${r}° → ${t.code} eliminato`)}else say(`bersaglio ${r}° → a vuoto`)}return 1}
+  for(let i=0;i<n;i++){const[r,t]=tgt(20);if(t){if(parry(t,k,p)){continue}t.ret=1;fx(t,"bad",`${t.code}: eliminato nell'incidente`);hit(t,k,p);say(`💥 bersaglio ${r}° → ${t.code} eliminato`)}else say(`bersaglio ${r}° → a vuoto`)}return 1}
  case"Spegnimento al Via":{if(!R1)return 0;c.kill=1;fx(c,"bad",`${c.code}: spento al via!`);say(`${P}: ${c.code} si spegne al via (metà passo)`);hit(c,k,p);return 1}
  case"Jump Start":if(!R1)return 0;c.ex+=1;c.jump=R(8)+1;say(`${P}: ${c.code} +1 passo, pagherà −5 al giro ${c.jump}`);return 1;
  case"Partenza Regolare":if(!R1)return 0;say(`${P}: ${c.code} parte senza bonus né malus`);return 1;
@@ -530,7 +574,7 @@ function use0(p,k,m,f,xs){
  case"DRS Guasto":{const[r,t]=tgt(10);say(`${P}: bersaglio ${r}° → ${t?t.code+" senza DRS per un giro":"a vuoto"}`);if(t){if(parry(t,k,p))return 1;t.dG=40;fx(t,"bad",`${t.code}: DRS guasto per un giro`);hit(t,k,p)}return 1}
  case"Ricorso":return 0;
  case"Virtual Safety Car":if(S.sc||(!f&&(R1||rk(c)<8||lapOf(Math.max(...live().map(x=>x.dist)))>8||Math.random()>.3)))return 0;S.sc=1;S.vsc=1;S.scr=0;say(`${P}: 🟨 VIRTUAL SAFETY CAR: tutte le auto a ${CFG.VSC_STEP} caselle per ${CFG.VSC_ROUNDS} round`);return 1;
- case"Bandiera Rossa":if(lapOf(Math.max(...live().map(x=>x.dist)))<2||(!f&&(rk(c)<10||lapOf(Math.max(...live().map(x=>x.dist)))>8||Math.random()>.12)))return 0;return redFlag(p,k)?1:0;
+ case"Bandiera Rossa":if(lapOf(Math.max(...live().map(x=>x.dist)))<2||(!f&&(rk(c)<10||lapOf(Math.max(...live().map(x=>x.dist)))>8||Math.random()>.2)))return 0;return redFlag(p,k)?1:0;
  }
  return 0}
 function render(){renderChamp();if(S.over&&!S.ps&&!S.ff&&!S.wait){S.ps=1;setTimeout(showPodium,700)}
@@ -589,7 +633,7 @@ function playH(k){if(k=="Ricorso"){S.fx.push({k:"good",m:"Ricorso scatta da solo
  if(S.played){S.fx.push({k:"bad",m:"Hai già giocato una carta in questo turno (1 per turno)",code:""});showFx();return}if(NET.client)return playOnline(k);const p=S.pl[S.cur];p.spt=SPT;const m=live().filter(c=>c.pi==S.cur&&!c.pit).sort((a,b)=>b.dist-a.dist),x=S.cars.find(c=>c.code==$("cs").value);
  let x2=x;if(k==CAM){const e=m.find(c=>c.pb&&c.pb.r==S.round-1&&!c.pit&&!c.pb.cc&&c.pb.a.pi!=c.pi&&c.dist<=c.pb.a.dist);if(e)x2=e}   // Cambio di Traiettoria: sceglie da solo il pilota superato
  let okc=useAny(p,k,m,x2);if(!okc&&k=="Sorpasso Azzardato"&&x2)okc=useAny(p,k,m,undefined);   // Sorpasso: se il pilota scelto non ha nessuno davanti, prova gli altri
- if(okc){p.hand.splice(p.hand.indexOf(k),1);RE.includes(k)&&S.disc.push(k);S.played=1;document.querySelectorAll(".hc").forEach(b=>b.classList.add("used"))}
+ if(okc){p.hand.splice(p.hand.indexOf(k),1);RE.includes(k)&&S.disc.push(k);S.played=1;if(S.rfH){S.rfH=0;render();rfMenus(()=>{showTurn();document.querySelectorAll(".hc").forEach(b=>b.classList.add("used"));const pe=$("pe");if(pe)pe.innerHTML=S.ev.map(e=>`<div>${e}</div>`).join("")},S.cur)}else document.querySelectorAll(".hc").forEach(b=>b.classList.add("used"))}
  else{const w=whyNot(k);say(`⚠ ${k}: non utilizzabile ora`+w);S.fx.push({k:"bad",m:`${k}: non utilizzabile ora`+w,code:""})}
  $("pe").innerHTML=S.ev.map(e=>`<div>${e}</div>`).join("");showFx()}
 $("bc").onclick=()=>{live().filter(c=>c.pi==S.cur).forEach(c=>{if(S.round==1){const v=$("st-"+c.code).value;setPlan(c,v=="L"?"L":v=="2",$("sts-"+c.code).value)}{const Lc=lapOf(c.dist);if(c.lmLap!==Lc){c.lmLap=Lc;if(!c.lmSet)c.lm=0;c.lmSet=0}}const d=$("dn-"+c.code);if(d)c.dnum=+d.value;const nxe=document.querySelector('.nxs[data-c="'+c.code+'"]');if(nxe)c.nxs=nxe.value});
@@ -726,14 +770,14 @@ function tipFor(k,m){const best=m[0],rk=best?cls().indexOf(best)+1:1,ahead=Math.
  case"Errore":case"Track Limits":case"Degrado Gomme Extra":case"Problemi Meccanici":case"Calo di Potenza":case"Sosta Lenta":case"DRS Guasto":if(S.sc&&(k=="Errore"||k=="Track Limits"))return["Non disponibile con la Safety Car",0];const ah=Math.round(Math.min(rk-1,10)*10);return[`Bersaglio a caso: ${ah}% di colpire chi ti precede`,ah>=55?1:0];
  case"Aria Sporca":{if(S.sc)return["Non disponibile con la Safety Car",0];const c=m.find(c=>!c.pit&&c.aS!==lapOf(c.dist)&&live().some(x=>x!==c&&x.pi!=c.pi&&c.dist-x.dist>0&&c.dist-x.dist<5));return c?[`Un rivale ti segue a meno di 5 caselle: ORA`,1]:["Utile se un rivale ti segue a meno di 5 caselle",0]}
  case"Talento Naturale":case"Fiducia":return["Bonus fino a fine gara: meglio usarla presto",1];
- case"Incidente":return["Colpisce 1-3 piloti a caso, anche tuoi",0];
+ case"Incidente":return["Colpisce 1-3 piloti a caso su tutti i 20, anche tuoi",0];
  case"Hammer Time":return["+2 passi per un giro (40 caselle): meglio subito",1];
  case"Box Perfetto":{if(S.sc)return["Non disponibile con Safety Car/VSC",0];const d=m.find(c=>!c.pit&&!c.bp&&(c.hp||c.fpr||(c.si<c.pl.length-1&&lapOf(c.dist)>=c.pls[c.si])));return d?[`${d.code} ha il box a fine giro: ORA`,1]:["Giocala prima di una sosta",0]}
  case"Gestione Gomme":{const d=m.filter(c=>!c.pit&&!(c.gg>0)).sort((a,b)=>ag(b)-ag(a))[0];return d&&ag(d)>=4?[`${d.code} è al giro ${ag(d)} di gomma: ORA`,1]:["Meglio con gomme già usurate",0]}
  case"Spionaggio":return["Scegli un avversario e guarda la sua mano",0];
  case"Ricorso":return["Scatta da solo quando un avversario ti colpisce",0];
  case"Virtual Safety Car":return[S.sc?"Gara già neutralizzata":"Tutti a 0,5 caselle per 2 round: utile con un box vicino",0];
- case"Bandiera Rossa":return[lapOf(Math.max(...live().map(x=>x.dist)))<2?"Non disponibile nel 1° giro":"Si riparte dalla griglia con gomme nuove: utile se sei indietro",rk>8&&lapOf(Math.max(...live().map(x=>x.dist)))>=2?1:0];}
+ case"Bandiera Rossa":return[lapOf(Math.max(...live().map(x=>x.dist)))<2?"Non disponibile nel 1° giro":"Si riparte dalla griglia con gomme nuove e puoi rifare la strategia: utile se sei indietro",rk>8&&lapOf(Math.max(...live().map(x=>x.dist)))>=2?1:0];}
  return["",0]}
 /* =====================================================================
    ESTENSIONE: MENU · DRAFT · ECONOMIA · GARAGE · MERCATO · CARRIERA
@@ -759,6 +803,9 @@ const CFG={
  MK_PREMIUM:.2,       // mercato: supplemento sul valore di un pezzo preso a un giocatore umano (clausola rescissoria)
  MK_LIMIT:1,          // mercato: acquisti consentiti a ogni giocatore tra una gara e l'altra
  MIN_VALUE:1,
+ CAR_MARKET:false,    // carriera: false = le monoposto non si possono più comprare né scambiare (c'è l'halving al loro posto)
+ HALVING_EVERY:2,     // carriera: halving delle monoposto ogni N stagioni (a fine 2ª, 4ª, 6ª...)
+ HALVING_DIV:1,       // dado dell'halving = distanza dalla media / HALVING_DIV (1 = dado pari alla distanza; 2 = dado dimezzato, livella più lentamente)
  // --- Rotazione piloti e mercato a finestre (solo carriera) ---
  MK_WIN:[11,1],       // finestre di consegna del mercato: prima della gara 11 e prima della gara 1 della stagione dopo
  MK_WIN_LIMIT:2,      // ordini consentiti a ogni giocatore per finestra (in Partita Veloce vale MK_LIMIT)
@@ -790,7 +837,7 @@ const CFG={
 const mny=n=>fm(n)+"M",carPrice=t=>CFG.CAR_PRICE[TEAMS[t][0]],ageMod=a=>(CFG.AGE_MOD.find(([m])=>a<=m)||[0,0])[1],drvPrice=x=>{const nm=DRV[x][0];if(G.mode=="quick"&&CFG.QUICK_PRICE[nm]!=null)return CFG.QUICK_PRICE[nm];const e=CFG.DRIVER[nm]||[0,25],b=DPR[x]!=null?DPR[x]:e[0];return Math.round(b*(1+ageMod(AGE[x]||e[1])))};
 const BASE_N=DRV.map(d=>d[0]),BASE_D=DRV.map(d=>d[1]),BASE_T=TEAMS.map(t=>t[1]),dcode=i=>DRV[i][3]||DRV[i][0].slice(0,3).toUpperCase();
 // G = meta partita · AGE/TUP/DBASE = età piloti, upgrade spesi per monoposto, OVR piloti a inizio carriera · PL = giocatori attuali
-let G={mode:"quick",dtype:"random",season:1,done:0,bud:[],end:null,keep:0,mkb:[]},AGE=[],TUP=[],DBASE=[],PL=[],DR={},MK={who:0,tab:"buy",pend:null,prop:null,tr:{cash:0}},GR={who:0},MP=0,svTimer=0;
+let G={mode:"quick",dtype:"random",season:1,done:0,bud:[],end:null,keep:0,mkb:[]},AGE=[],TUP=[],TUPP=[],DBASE=[],PL=[],DR={},MK={who:0,tab:"buy",pend:null,prop:null,tr:{cash:0}},GR={who:0},MP=0,svTimer=0;
 const carVal=t=>carPrice(t)+TUP[t];                                                         // valore mercato monoposto = prezzo + tutti gli upgrade
 const dstep=l=>(CFG.DRV_STEP.find(([a,z])=>l>=a&&l<=z)||CFG.DRV_STEP[0])[2];
 const drvVal=x=>{const a=DBASE[x],b=DRV[x][1];let d=0;if(b>a)for(let l=a+1;l<=b;l++)d+=dstep(l);else for(let l=b+1;l<=a;l++)d-=dstep(l);return Math.max(CFG.MIN_VALUE,drvPrice(x)+d)};      // valore mercato pilota
@@ -798,7 +845,7 @@ const owC=t=>PL.find(p=>p.t==t),owD=x=>PL.find(p=>p.d.includes(x)),ownL=p=>`${NE
 const raceOn=()=>!!S&&!S.ph&&!S.over;      // gara già preparata e non conclusa: garage e mercato bloccati
 const upCost=o=>{if(o>=CFG.OVR_MAX)return null;const r=CFG.UPGRADE.find(([a,b])=>o>=a&&o<=b);return r?r[2]:CFG.UPGRADE[0][2]};
 
-function resetWorld(){DRV.forEach((d,i)=>{d[0]=BASE_N[i];d[1]=BASE_D[i];d[3]=undefined});TEAMS.forEach((t,i)=>t[1]=BASE_T[i]);AGE=DRV.map(d=>CFG.DRIVER[d[0]][1]);TUP=TEAMS.map(()=>0);DBASE=[...BASE_D];
+function resetWorld(){DRV.forEach((d,i)=>{d[0]=BASE_N[i];d[1]=BASE_D[i];d[3]=undefined});TEAMS.forEach((t,i)=>t[1]=BASE_T[i]);AGE=DRV.map(d=>CFG.DRIVER[d[0]][1]);TUP=TEAMS.map(()=>0);TUPP=TEAMS.map(()=>0);DBASE=[...BASE_D];
  G.bud=Array(10).fill(CFG.BUDGET);G.mkb=Array(10).fill(0);G.season=1;G.done=0;G.end=null;G.keep=0;initPool();G.mkq=[];G.inbox=[];G.wr=0}
 const lockUI=()=>{$("ng").disabled=G.mode=="career";$("nh").disabled=G.mode=="career"||G.dtype=="draft"};
 function note(m,k){const d=document.createElement("div");d.className="toast "+(k||"good");d.textContent=m;$("fx").appendChild(d);setTimeout(()=>d.remove(),7200)}
@@ -815,8 +862,8 @@ const rnd=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),mkq=()=>G.mkq||(G.mkq=[]),i
 const curve=o=>{const P=CFG.PRICE_CURVE;if(o<=P[0][0])return P[0][1];for(let i=1;i<P.length;i++)if(o<=P[i][0]){const[a,b]=P[i-1],[c,d]=P[i];return b+(d-b)*(o-a)/(c-a)}return P[P.length-1][1]};
 const poolVal=p=>Math.max(CFG.MIN_VALUE,Math.round(curve(p.o)*(1+ageMod(p.a))));
 function initPool(){POOL=CFG.FREE.map(([n,o,a,c])=>({n,o,a,c,pot:a<=22?o+rnd(CFG.POT_ADD[0],CFG.POT_ADD[1]):99}));RET=[];DPR=[]}
-const worldPack=()=>({dovr:DRV.map(d=>d[1]),tovr:TEAMS.map(t=>t[1]),age:AGE,tup:TUP,dbase:DBASE,dn:DRV.map(d=>[d[0],d[3]||""]),dpr:DPR,pool:POOL});
-function worldApply(W){W.dovr.forEach((v,i)=>DRV[i][1]=v);W.tovr.forEach((v,i)=>TEAMS[i][1]=v);AGE=W.age;TUP=W.tup;DBASE=W.dbase;
+const worldPack=()=>({dovr:DRV.map(d=>d[1]),tovr:TEAMS.map(t=>t[1]),age:AGE,tup:TUP,tupp:TUPP,dbase:DBASE,dn:DRV.map(d=>[d[0],d[3]||""]),dpr:DPR,pool:POOL});
+function worldApply(W){W.dovr.forEach((v,i)=>DRV[i][1]=v);W.tovr.forEach((v,i)=>TEAMS[i][1]=v);AGE=W.age;TUP=W.tup;TUPP=W.tupp||TEAMS.map(()=>0);DBASE=W.dbase;
  if(W.dn)W.dn.forEach((a,i)=>{DRV[i][0]=a[0];DRV[i][3]=a[1]||undefined});DPR=(W.dpr||[]).map(v=>v==null?undefined:v);if(W.pool)POOL=W.pool}
 // pezzi in trattativa (con un ordine di mercato in attesa): non si possono scambiare, ritirare o sostituire
 const lockedC=t=>mkq().some(o=>o.k=="c"&&(o.i==t||o.g==t)),lockedD=x=>mkq().some(o=>o.k!="c"&&(o.i==x||o.g==x)),lockedP=n=>mkq().some(o=>o.k=="p"&&o.n==n),
@@ -837,6 +884,7 @@ function notify(pid,m,bad){if(pid==null||pid<0||pid>=NH())return;const a=(ibx()[
 function poolNet(me,n,slot){const p=POOL.find(q=>q.n==n),y=me.d[slot];if(!p||y==null)return null;const v=poolVal(p),g=drvVal(y);return{o:null,v,g,pr:0,net:v-g,y,p}}
 // ordine di mercato (carriera): i soldi si trattengono subito, il pezzo arriva alla finestra (gara 11 o gara 1 della stagione dopo)
 function orderCore(me,k,i,slot,n){
+ if(k=="c"&&noCar())return"Le monoposto non si possono più comprare: ogni "+CFG.HALVING_EVERY+" stagioni c'è l'halving";
  if(mkLeftW(me)<=0)return`Limite raggiunto: ${CFG.MK_WIN_LIMIT} ordini per finestra`;
  const q=k=="p"?poolNet(me,n,slot):netPrice(me,k,i,slot);if(!q||q.o===me)return"Ordine non possibile";
  if(k=="p"?lockedP(n):k=="c"?lockedC(i):lockedD(i))return"Pezzo già in trattativa";
@@ -855,7 +903,7 @@ function orderCore(me,k,i,slot,n){
 function cancelOrder(od,why){const ix=mkq().indexOf(od);if(ix>=0)mkq().splice(ix,1);if(od.from>=0)G.bud[od.from]+=od.amt;
  const pn=pcName(od.k,od.i,od.n),m=`❌ Ordine annullato (${pn}): ${why}.${od.from>=0?" Importo trattenuto rimborsato.":""}`;
  notify(od.by,m,1);if(od.o>=0&&od.o!==od.by)notify(od.o,`❌ L'ordine di ${ownL(PL[od.by])} per ${pn} è stato annullato: ${why}.`,1);return m}
-function deliverOne(od){const me=PL[od.by],o=od.o>=0?PL[od.o]:null;let p=null,ok;
+function deliverOne(od){if(od.k=="c"&&noCar())return cancelOrder(od,"le monoposto non si possono più comprare");const me=PL[od.by],o=od.o>=0?PL[od.o]:null;let p=null,ok;
  if(od.k=="c")ok=!!o&&me.t==od.g&&o.t==od.i;else if(od.k=="d")ok=!!o&&me.d.includes(od.g)&&o.d.includes(od.i);else{p=POOL.find(q=>q.n==od.n);ok=!!p&&me.d.includes(od.g)}
  if(!ok)return cancelOrder(od,"il pezzo non è più disponibile");
  const ix=mkq().indexOf(od);if(ix>=0)mkq().splice(ix,1);
@@ -929,7 +977,7 @@ function useAny(p,k,m,x){if(use(p,k,m,1,x))return 1;
 function scBunch(){const l=live().filter(c=>!c.pit).sort((a,b)=>b.dist-a.dist);l.forEach((c,i)=>{if(i)c.dist=l[0].dist-CFG.SC_GAP*i;c.lane=i%3});say(`🚨 Le auto si compattano dietro la Safety Car, a ${CFG.SC_GAP} caselle una dall'altra`)}
 
 /* ---------- SALVATAGGIO (localStorage) ---------- */
-function snapshot(){return{v:1,t:Date.now(),dtype:G.dtype,nh:NH(),qual:$("qf").checked,season:G.season,done:G.done,bud:G.bud,tup:TUP,age:AGE,dovr:DRV.map(d=>d[1]),tovr:TEAMS.map(t=>t[1]),dbase:DBASE,
+function snapshot(){return{v:1,t:Date.now(),dtype:G.dtype,nh:NH(),qual:$("qf").checked,season:G.season,done:G.done,bud:G.bud,tup:TUP,tupp:TUPP,age:AGE,dovr:DRV.map(d=>d[1]),tovr:TEAMS.map(t=>t[1]),dbase:DBASE,
  pl:PL.map(p=>({id:p.id,off:p.off,ot:p.ot,d:p.d,t:p.t})),ch:{pp:CH.pp,dp:CH.dp,ps:CH.ps,win:CH.win,h:CH.h||[]},end:G.end,pool:POOL,ret:RET,dn:DRV.map(d=>[d[0],d[3]||""]),dpr:DPR,mkq:G.mkq||[],ib:G.inbox||[],wr:G.wr||0,names:NET.on?NET.names:undefined,room:NET.on?NET.code:undefined}}
 function saveCareer(){if(G.mode!="career"||NET.client)return;let ok=false;try{localStorage.setItem(SKEY,JSON.stringify(snapshot()));ok=true}catch(e){}
  if(!ok)note("⚠ Salvataggio non riuscito (archivio del browser non disponibile)","bad");
@@ -999,7 +1047,7 @@ function showHelp(back){
  ov(`<h3>📖 COME SI GIOCA</h3><div class="helpw">
  ${sec("🎯 Obiettivo",`<p>Ogni giocatore guida una <b>scuderia</b>: 1 monoposto e 2 piloti. Vince chi porta i suoi piloti più in alto in classifica. In una gara si fanno <b>10 giri</b> (40 caselle l'uno, 400 in tutto); la classifica finale dà punti come in F1: <b>25-18-15-12-10-8-6-4-2-1</b> ai primi 10. Con più gare si gioca un campionato piloti e costruttori.</p>`,1)}
  ${sec("🏁 Come funziona un round",`<p>La gara avanza a <b>round</b>. Prima del round i giocatori umani fanno le loro scelte, poi tutte le auto si muovono insieme. Il passo di ogni auto dipende da: il <b>passo base</b> (media OVR pilota + monoposto: 1 casella a media 80, +0,2 per ogni punto, a mezze caselle, da 0,5 a 5), gomme e usure, modalità di guida, scia/DRS, corsia e dadi. Nei turni vedi il consiglio della radio ("📻") e il riquadro dei suggerimenti sulle carte.</p><p>Le <b>qualifiche</b> (Q1-Q2-Q3, opzionali) decidono la griglia: ogni posizione parte mezza casella più indietro.</p><p><b>Mai due auto sulla stessa casella:</b> nella stessa corsia due auto stanno ad almeno 1 casella una dall'altra. Per superare l'auto davanti ti sposti in una corsia libera (lo fa in automatico quando conviene) e <b>ogni sorpasso costa mezza casella</b> di movimento. Se non c'è corsia libera resti dietro. Le carte (Sorpasso Azzardato, Cambio di Traiettoria, Difesa Impenetrabile, ecc.) funzionano come prima, ma nessuna carta lascia due auto nella stessa casella.</p>`)}
- ${sec("🛞 Gomme e box",`<p>Tre mescole: <b>S</b> (morbida) +6 al 1° giro poi +4, ma dura solo 3 giri; <b>M</b> (media) +5 al 1° giro poi +4, dura 4 giri (al 5° scende a +1); <b>H</b> (dura) +4 costante e dura 6 giri. Oltre la durata la gomma crolla. Le tattiche più forti sono <b>S→M→S</b> (2 soste) e <b>M→H</b> (1 sosta). Al primo round scegli la strategia: <i>2 gomme</i> (M→H, 1 sosta), <i>3 gomme</i> (S→M→S, 2 soste) o <i>libera</i> (decidi tu ogni box).</p><p>Per fermarti spunta <b>Box al prossimo traguardo</b> e scegli la gomma da montare. Ai box l'auto resta ferma qualche round e poi si tira un dado per la ripartenza. Se <b>entrambe</b> le auto della stessa scuderia entrano insieme, la seconda resta ferma un round in più. Quando più auto escono dai box insieme, escono in fila indiana (1 casella una dall'altra, la prima alla casella 6, fine della pit lane) e le auto in pista si spostano di corsia per fare spazio: nessuna aspetta un varco. Tutte le carte che colpiscono gli avversari (Calo di Potenza, Sosta Lenta, DRS Guasto, Errore, Track Limits...) bersagliano solo i primi 10.</p>`)}
+ ${sec("🛞 Gomme e box",`<p>Tre mescole: <b>S</b> (morbida) +6 al 1° giro poi +4, ma dura solo 3 giri; <b>M</b> (media) +5 al 1° giro poi +4, dura 4 giri (al 5° scende a +1); <b>H</b> (dura) +4 costante e dura 6 giri. Oltre la durata la gomma crolla. Le tattiche più forti sono <b>S→M→S</b> (2 soste) e <b>M→H</b> (1 sosta). Al primo round scegli la strategia: <i>2 gomme</i> (M→H, 1 sosta), <i>3 gomme</i> (S→M→S, 2 soste) o <i>libera</i> (decidi tu ogni box).</p><p>Per fermarti spunta <b>Box al prossimo traguardo</b> e scegli la gomma da montare. Ai box l'auto resta ferma qualche round e poi si tira un dado per la ripartenza. Se <b>entrambe</b> le auto della stessa scuderia entrano insieme, la seconda resta ferma un round in più. Quando più auto escono dai box insieme, escono in fila indiana (1 casella una dall'altra, la prima alla casella 6, fine della pit lane) e le auto in pista si spostano di corsia per fare spazio: nessuna aspetta un varco. Tutte le carte che colpiscono gli avversari (Calo di Potenza, Sosta Lenta, DRS Guasto, Errore, Track Limits...) bersagliano solo i primi 10 (l'<b>Incidente</b> fa eccezione: può colpire tutti i 20 piloti).</p>`)}
  ${sec("⚡ Guida, corsie e partenza",`<p>A ogni nuovo giro scegli la modalità: <b>PUSH</b> (+1 ora, −1 al giro dopo), <b>NORMALE</b>, <b>RISPARMIO</b> (−1 ora, +1 al giro dopo). La <b>corsia</b> (sinistra/centro/destra o AUTO) cambia la scia e il passo, con il valore previsto accanto a ogni pulsante.</p><p>🚀 Le <b>carte di partenza</b> (Partenza a Razzo e Buona Partenza) sono le uniche che <b>saltano</b> gli avversari davanti anche a caselle piene. Il menu pilota mostra sempre il giro della gomma in uso, anche se hai programmato il box.</p><p>Al via ogni pilota ha una <b>carta partenza</b> obbligatoria (Partenza a Razzo +4, Buona Partenza +2, Partiti +1, Partenza Regolare 0, Spegnimento al Via: il pilota che la riceve fa metà passo al primo round, Jump Start: +1 ma paga −5 più avanti) che si usa da sola.</p>`)}
  ${sec("🃏 Le carte",`<p>Al via hai solo le carte di partenza, poi si pescano 2 carte a ogni nuovo giro; puoi giocare <b>1 carta per turno</b> (clicca o trascina su una tua auto in pista).</p><ul>
  <li>🎯 <b>Sorpasso Azzardato</b>: attacchi chi è a 1 casella davanti, dado pari = sorpasso, dispari = fallisce: tu perdi 1 casella e l'avversario ne guadagna 1.</li>
@@ -1007,13 +1055,13 @@ function showHelp(back){
  <li>🚧 <b>Track Limits</b> −6 caselle e 💥 <b>Errore</b> −10 a un pilota a caso tra i primi 10 (bersaglio con d10).</li>
  <li>⭐ <b>Talento Naturale</b> +3 OVR fino a fine gara · 💪 <b>Fiducia</b> +1 passo per tutta la gara.</li>
  <li>🛞 <b>Degrado Gomme Extra</b> −2 passi per un giro · 🔧 <b>Problemi Meccanici</b> (avversario ai box) · 🛡️ <b>Difesa Impenetrabile</b> (nessuno ti passa).</li>
- <li>🚨 <b>Safety Car</b>: auto compattate a 0,5 caselle in ordine di gara · 💣 <b>Incidente</b>: piloti eliminati a caso (dadi).</li>
+ <li>🚨 <b>Safety Car</b>: auto compattate a 0,5 caselle in ordine di gara · 💣 <b>Incidente</b>: da 1 a 3 piloti eliminati a caso (dadi) tra <b>tutti i 20</b>, non solo i primi 10.</li>
  <li>🔨 <b>Hammer Time</b> +2 passi per un giro · ⏱️ <b>Box Perfetto</b> sosta di 1 solo round (non con Safety Car/VSC) · 🧊 <b>Gestione Gomme</b> la gomma non si consuma per 1 giro · 🕵️ <b>Spionaggio</b> vedi la mano di un avversario a tua scelta.</li>
  <li>🌫️ <b>Aria Sporca</b> la giochi sul tuo pilota, senza dadi: fino alla fine del giro chi ti segue a meno di 5 caselle non prende la scia e fa −1 passo (inevitabile, in qualsiasi corsia) · 📉 <b>Calo di Potenza</b> −1 passo per un giro · 🐌 <b>Sosta Lenta</b> la prossima sosta dura 1 round in più · 🚫 <b>DRS Guasto</b> niente DRS per un giro (bersaglio con d10: solo i primi 10 in classifica, può colpire anche il tuo compagno).</li>
- <li>⚖️ <b>Ricorso</b> scatta da solo e annulla una carta avversaria che colpisce un tuo pilota (si può disattivare nel tuo turno) · 🟨 <b>Virtual Safety Car</b> tutte le auto avanzano di 0,5 caselle per 2 round, con gli stessi effetti della Safety Car · 🔴 <b>Bandiera Rossa</b> gara sospesa: si riparte da fermi dalla griglia con posizioni e giri attuali e cambio gomme gratis per tutti (non si può giocare nel 1° giro).</li></ul><p>Quando un avversario ti colpisce con una carta compare l'animazione <b>COLPITO!</b>.</p>`)}
+ <li>⚖️ <b>Ricorso</b> scatta da solo e annulla una carta avversaria che colpisce un tuo pilota (si può disattivare nel tuo turno) · 🟨 <b>Virtual Safety Car</b> tutte le auto avanzano di 0,5 caselle per 2 round, con gli stessi effetti della Safety Car · 🔴 <b>Bandiera Rossa</b> gara sospesa: si riparte da fermi dalla griglia con posizioni e giri attuali e cambio gomme gratis per tutti (non si può giocare nel 1° giro). Subito dopo si apre il <b>menu per rifare la strategia</b> sui giri rimanenti: mescole e soste proposte sono calcolate sui giri che mancano e la scelta consigliata è già selezionata.</li></ul><p>Quando un avversario ti colpisce con una carta compare l'animazione <b>COLPITO!</b>.</p>`)}
  ${sec("🎲 Draft Casuale o Draft con budget",`<p><b>Draft Casuale</b>: squadre e piloti vengono assegnati a sorte, poi c'è il rimescolamento e il bonus <b>+${CFG.BONUS}</b> ai pezzi che coincidono col sorteggio iniziale.</p><p><b>Draft</b>: ognuno parte con <b>${mny(CFG.BUDGET)}</b>. Si estrae l'ordine di scelta e si fanno 3 giri nello stesso ordine: monoposto, 1° pilota, 2° pilota. Ogni pezzo costa un prezzo di listino e nessuno può prendere ciò che è già stato scelto; devi tenere abbastanza budget per completare la squadra. I pezzi avanzati vanno alle CPU. A ogni gara si sorteggia un pacchetto casuale: se lo possiedi prendi il bonus +${CFG.BONUS}.</p>`)}
- ${sec("💰 Carriera, soldi e garage",`<p>La carriera dura <b>${CFG.SEASON_RACES} gare a stagione</b> e si <b>salva da sola</b> dopo ogni gara, potenziamento, acquisto e passo di fine stagione ("Continua carriera" dal menu).</p><ul><li><b>Premi gara</b> per ogni tuo pilota: ${CFG.RACE_PRIZE.slice(0,3).map((x,i)=>(i+1)+"° +"+mny(x)).join(", ")}, 4°-10° +${mny(CFG.RACE_PRIZE[3])}.</li><li><b>Premio stagione</b> per posizione costruttori: 25, 21, 17, 14, 11, 8, 6, 4, 2, 1 milioni.</li><li><b>🔧 Garage</b>: potenzia l'OVR della tua monoposto di 1 punto alla volta, il costo cresce con l'OVR (da ${mny(CFG.UPGRADE[0][2])} fino a ${mny(CFG.UPGRADE[CFG.UPGRADE.length-1][2])} a punto), massimo 99. L'effetto vale dalla gara dopo. Non disponibile durante una gara.</li><li><b>🔁 Mercato</b>: compri un pezzo di un altro (anche CPU) a <b>prezzo netto</b>: valore del pezzo che prendi − valore di quello che cedi (se vale di più incassi la differenza). Se il venditore è un giocatore umano c'è un supplemento del ${Math.round(CFG.MK_PREMIUM*100)}%. Per i piloti scegli tu chi cedere. In carriera il mercato è <b>sempre aperto</b> (anche durante la gara) ma funziona a <b>ordini</b>: i soldi si trattengono subito e il pezzo arriva <b>prima della gara ${CFG.MK_WIN[0]}</b> (ordini fatti fino alla gara ${CFG.MK_WIN[0]-1}) oppure <b>prima della gara 1 della stagione dopo</b>; chi perde il pezzo riceve una notifica. Puoi ordinare anche i <b>piloti liberi</b>. Massimo ${CFG.MK_WIN_LIMIT} ordini per finestra (in Partita Veloce il mercato resta immediato: ${CFG.MK_LIMIT} acquisto tra una gara e l'altra). Tra umani puoi anche proporre <b>scambi</b>, con conguaglio opzionale.</li></ul>`)}
- ${sec("📈 Fine stagione",`<p>Sette passi: classifica piloti, classifica costruttori, premio costruttori, <b>evoluzione dei piloti</b> (giovani ≤25 anni crescono fino a +3, i 26-33 anni oscillano tra +1 e −1, gli ≥34 calano), invecchiamento di 1 anno, <b>ritiri e ricambi</b> (probabilità per età, ridotte per chi finisce tra i primi 5 e aumentate per chi finisce tra gli ultimi 5 o perde 2+ punti OVR; chi possiede il pilota incassa il ${Math.round(CFG.RET_BONUS*100)}% del suo valore e sceglie il sostituto tra i <b>piloti liberi</b>, le CPU lo sorteggiano), poi si riparte con garage e mercato. I piloti liberi cambiano OVR ogni stagione per età (i giovani crescono fino al loro potenziale, gli anziani calano) e a ogni finestra le CPU sostituiscono (max ${CFG.CPU_SWAPS}) il loro pilota più debole se un libero ha OVR più alto.</p>`)}
+ ${sec("💰 Carriera, soldi e garage",`<p>La carriera dura <b>${CFG.SEASON_RACES} gare a stagione</b> e si <b>salva da sola</b> dopo ogni gara, potenziamento, acquisto e passo di fine stagione ("Continua carriera" dal menu).</p><ul><li><b>Premi gara</b> per ogni tuo pilota: ${CFG.RACE_PRIZE.slice(0,3).map((x,i)=>(i+1)+"° +"+mny(x)).join(", ")}, 4°-10° +${mny(CFG.RACE_PRIZE[3])}.</li><li><b>Premio stagione</b> per posizione costruttori: 25, 21, 17, 14, 11, 8, 6, 4, 2, 1 milioni.</li><li><b>🔧 Garage</b>: potenzia l'OVR della tua monoposto di 1 punto alla volta, il costo cresce con l'OVR (da ${mny(CFG.UPGRADE[0][2])} fino a ${mny(CFG.UPGRADE[CFG.UPGRADE.length-1][2])} a punto), massimo 99. L'effetto vale dalla gara dopo. Non disponibile durante una gara.</li><li><b>🏎 Halving</b> (solo carriera): ogni ${CFG.HALVING_EVERY} stagioni, a fine stagione, si calcola la <b>media</b> degli OVR di tutte le monoposto. Chi sta sotto la media tira un dado grande quanto la distanza e <b>sale</b> del numero uscito; chi sta sopra tira lo stesso dado e <b>scende</b>. Esempio: media 90, monoposto a 82 → dado da 8, esce 2 → 84; monoposto a 98 → dado da 8, esce 2 → 96. Chi è alla media non cambia. Poi ogni monoposto tira un <b>dado novità</b> (d6: 1 = −3, 6 = +3), così il campo non si livella del tutto e l'ordine può cambiare. Media e dadi usano l'OVR totale, quindi contano anche i punti comprati col garage. Le monoposto non si possono più comprare né scambiare.</li><li><b>🔁 Mercato</b>: compri un pezzo di un altro (anche CPU; in carriera le monoposto non si possono più comprare) a <b>prezzo netto</b>: valore del pezzo che prendi − valore di quello che cedi (se vale di più incassi la differenza). Se il venditore è un giocatore umano c'è un supplemento del ${Math.round(CFG.MK_PREMIUM*100)}%. Per i piloti scegli tu chi cedere. In carriera il mercato è <b>sempre aperto</b> (anche durante la gara) ma funziona a <b>ordini</b>: i soldi si trattengono subito e il pezzo arriva <b>prima della gara ${CFG.MK_WIN[0]}</b> (ordini fatti fino alla gara ${CFG.MK_WIN[0]-1}) oppure <b>prima della gara 1 della stagione dopo</b>; chi perde il pezzo riceve una notifica. Puoi ordinare anche i <b>piloti liberi</b>. Massimo ${CFG.MK_WIN_LIMIT} ordini per finestra (in Partita Veloce il mercato resta immediato: ${CFG.MK_LIMIT} acquisto tra una gara e l'altra). Tra umani puoi anche proporre <b>scambi</b>, con conguaglio opzionale.</li></ul>`)}
+ ${sec("📈 Fine stagione",`<p>Sette passi (otto negli anni di halving): classifica piloti, classifica costruttori, premio costruttori, <b>evoluzione dei piloti</b> (giovani ≤25 anni crescono fino a +3, i 26-33 anni oscillano tra +1 e −1, gli ≥34 calano), invecchiamento di 1 anno, <b>ritiri e ricambi</b> (probabilità per età, ridotte per chi finisce tra i primi 5 e aumentate per chi finisce tra gli ultimi 5 o perde 2+ punti OVR; chi possiede il pilota incassa il ${Math.round(CFG.RET_BONUS*100)}% del suo valore e sceglie il sostituto tra i <b>piloti liberi</b>, le CPU lo sorteggiano), poi, ogni ${CFG.HALVING_EVERY} stagioni, l'<b>halving</b> delle monoposto, e si riparte con garage e mercato. I piloti liberi cambiano OVR ogni stagione per età (i giovani crescono fino al loro potenziale, gli anziani calano) e a ogni finestra le CPU sostituiscono (max ${CFG.CPU_SWAPS}) il loro pilota più debole se un libero ha OVR più alto.</p>`)}
  ${sec("🌐 Online",`<p>Dal menu <b>Online · Stanze</b>: uno crea la stanza (host) e gli altri entrano col codice. Si gioca <b>tutti insieme con timer</b>: ognuno sceglie in contemporanea e, scaduto il tempo, si procede con le scelte fatte. Ognuno vede solo le proprie carte. L'host deve tenere la pagina aperta; la carriera online si salva sul suo browser e per riprenderla si rientra con lo <b>stesso nome</b>.</p>`)}
  ${sec("👥 Più giocatori sullo stesso dispositivo",`<p>Con più umani offline lo schermo passa da uno all'altro: tocca a un giocatore alla volta, premi "Sono G…" per vedere le tue carte e "Conferma" per passare.</p>`)}
  </div><button class="p" id="hbk">‹ Indietro</button>`);
@@ -1108,7 +1156,7 @@ function showBonusDraw(pl,done){S.wait=3;
 /* ---------- CARRIERA: ripresa, hub, nuova stagione ---------- */
 function continueCareer(){const r=readSave();if(r.st!="ok")return showMain(0);loadCareerState(r.sv);updBud();(G.end||CH.r>=CH.n)?openEndSeason():showHub()}
 function loadCareerState(sv){stop();
- G.mkb=Array(10).fill(0);G.mode="career";G.dtype=sv.dtype;G.season=sv.season;G.done=sv.done;G.bud=sv.bud;G.end=sv.end;G.keep=0;TUP=sv.tup;AGE=sv.age;DBASE=sv.dbase;
+ G.mkb=Array(10).fill(0);G.mode="career";G.dtype=sv.dtype;G.season=sv.season;G.done=sv.done;G.bud=sv.bud;G.end=sv.end;G.keep=0;TUP=sv.tup;TUPP=sv.tupp||TEAMS.map(()=>0);AGE=sv.age;DBASE=sv.dbase;
  DRV.forEach((d,i)=>d[1]=sv.dovr[i]);TEAMS.forEach((t,i)=>t[1]=sv.tovr[i]);
  if(sv.dn)sv.dn.forEach((a,i)=>{DRV[i][0]=a[0];DRV[i][3]=a[1]||undefined});else DRV.forEach((d,i)=>{d[0]=BASE_N[i];d[3]=undefined});
  if(sv.pool){POOL=sv.pool;RET=sv.ret||[]}else initPool();DPR=(sv.dpr||[]).map(v=>v==null?undefined:v);G.mkq=sv.mkq||[];G.inbox=Array.from({length:10},(_,i)=>(sv.ib&&sv.ib[i])||[]);G.wr=sv.wr||0;
@@ -1135,7 +1183,7 @@ function grg(){const p=PL[GR.who],t=p.t,o=TEAMS[t][1],c=upCost(o),b=G.bud[p.id],
   <details><summary class="mut">Tabella dei costi (per punto, in base all'OVR attuale)</summary><table><tbody>${CFG.UPGRADE.map(([a,z,k])=>`<tr><td>OVR ${a}–${z}</td><td>${mny(k)} per punto</td></tr>`).join("")}<tr><td>OVR ${CFG.OVR_MAX}</td><td>limite massimo</td></tr></tbody></table></details>
   <button id="gbk">‹ Chiudi</button>`);
  if($("gsel"))$("gsel").onchange=()=>{GR.who=+$("gsel").value;grg()};
- $("gup").onclick=()=>{if(NET.on){netCmd({c:"up"});if(!NET.client)grg();return}const c2=upCost(TEAMS[t][1]);if(c2==null||G.bud[p.id]<c2)return;G.bud[p.id]-=c2;TUP[t]+=c2;TEAMS[t][1]++;updBud();saveCareer();grg()};   // effetto immediato sull'OVR, salvato subito
+ $("gup").onclick=()=>{if(NET.on){netCmd({c:"up"});if(!NET.client)grg();return}const c2=upCost(TEAMS[t][1]);if(c2==null||G.bud[p.id]<c2)return;G.bud[p.id]-=c2;TUP[t]+=c2;TUPP[t]=(TUPP[t]||0)+1;TEAMS[t][1]++;updBud();saveCareer();grg()};   // effetto immediato sull'OVR, salvato subito
  $("gbk").onclick=()=>{GR.open=0;GR.back()}}
 
 /* ---------- MERCATO ---------- */
@@ -1160,7 +1208,7 @@ function mkBuy(me,b){const car=G.mode=="career";
  const rk=a=>{if(!car)return"";const p=retP(a+1);return p>0?` <span class="mut">· ⚠ ritiro ${Math.round(p*100)}%</span>`:""},
   sl=r=>r.k=="c"?[0]:[0,1],nets=r=>sl(r).map(j=>(r.k=="p"?poolNet(me,r.n,j):netPrice(me,r.k,r.i,j)).net),
   rows=PL.filter(p=>p!==me).flatMap(p=>[{k:"c",i:p.t,o:p,ovr:TEAMS[p.t][1],v:carVal(p.t),n:TEAMS[p.t][0]+(TUP[p.t]?` <span class="mut">(+${mny(TUP[p.t])} upgrade)</span>`:""),a:"monoposto",lk:car&&lockedC(p.t)},...p.d.map(x=>({k:"d",i:x,o:p,ovr:DRV[x][1],v:drvVal(x),n:DRV[x][0],a:AGE[x]+" anni"+rk(AGE[x]),lk:car&&lockedD(x)}))])
-   .concat(car?POOL.map(p=>({k:"p",i:-1,n:p.n,o:null,ovr:p.o,v:poolVal(p),a:p.a+" anni · libero"+rk(p.a),lk:lockedP(p.n)})):[]).sort((x,y)=>y.ovr-x.ovr),
+   .concat(car?POOL.map(p=>({k:"p",i:-1,n:p.n,o:null,ovr:p.o,v:poolVal(p),a:p.a+" anni · libero"+rk(p.a),lk:lockedP(p.n)})):[]).filter(r=>!(noCar()&&r.k=="c")).sort((x,y)=>y.ovr-x.ovr),
   P=MK.pend,left=car?mkLeftW(me):mkLeft(me);let pend="";
  if(P){
   if(P.k=="c"){const o=owC(P.i),q=netPrice(me,"c",P.i,0);pend=q?`<div class="warn">${car?"Ordinare":"Comprare"} <b>${TEAMS[P.i][0]}</b> da ${ownL(o)}: valore ${mny(q.v)}${q.pr?` + supplemento ${mny(q.pr)}`:""} − la tua ${TEAMS[me.t][0]} (${mny(q.g)}), che passa a ${ownL(o)}. Totale: ${netTxt(q.net)}.${car?` Consegna <b>${winTxt(curWin())}</b>: i soldi si trattengono subito.`:""}<br><button class="p" id="mok"${q.net>b||(car&&lockedC(me.t))?" disabled":""}>CONFERMA</button> <button id="mno">Annulla</button></div>`:""}
@@ -1171,12 +1219,12 @@ function mkBuy(me,b){const car=G.mode=="career";
  const rg=n=>n.length>1&&n[0]!==n[1]?`${n[0]>0?mny(n[0]):"+"+mny(-n[0])} / ${n[1]>0?mny(n[1]):"+"+mny(-n[1])}`:(n[0]>0?mny(n[0]):n[0]<0?"+"+mny(-n[0]):"0M");
  const ib=car?(ibx()[me.id]||[]).slice(-5):[],my=car?mkq().filter(o=>o.by==me.id):[],
   extra=(ib.length?`<div class="warn">📨 <b>Notifiche</b><br>${ib.join("<br>")}</div>`:"")+(my.length?`<div class="warn">⏳ <b>I tuoi ordini in attesa</b><br>${my.map(o=>`${pcName(o.k,o.i,o.n)} (cedi ${pcName(o.k=="c"?"c":"d",o.g)}) · ${winTxt(o.w)} <button class="mcx" data-id="${o.id}">Annulla ordine</button>`).join("<br>")}</div>`:""),
-  hdr=car?`<div class="mut">Mercato sempre aperto: gli ordini di adesso arrivano <b>${winTxt(curWin())}</b> · ordini rimasti per questa finestra: <b>${left}</b> su ${CFG.MK_WIN_LIMIT}</div>`:(left<=0?`<div class="warn">Hai già fatto ${CFG.MK_LIMIT} acquisto${CFG.MK_LIMIT>1?"i":""} in questa fase: potrai comprare ancora dopo la prossima gara.</div>`:`<div class="mut">Acquisti rimasti in questa fase: <b>${left}</b></div>`);
+  hdr=car?`<div class="mut">Mercato sempre aperto: gli ordini di adesso arrivano <b>${winTxt(curWin())}</b> · ordini rimasti per questa finestra: <b>${left}</b> su ${CFG.MK_WIN_LIMIT}</div>${noCar()?`<div class="mut">🏎 Le monoposto non si possono più comprare: ogni ${CFG.HALVING_EVERY} stagioni c'è l'<b>halving</b> (le monoposto si riavvicinano alla media).</div>`:""}`:(left<=0?`<div class="warn">Hai già fatto ${CFG.MK_LIMIT} acquisto${CFG.MK_LIMIT>1?"i":""} in questa fase: potrai comprare ancora dopo la prossima gara.</div>`:`<div class="mut">Acquisti rimasti in questa fase: <b>${left}</b></div>`);
  return hdr+extra+pend+`<div class="w"><table><thead><tr><th>Pezzo</th><th>Info</th><th>OVR</th><th>Proprietario</th><th>Valore</th><th>Costo netto</th><th></th></tr></thead><tbody>${rows.map(r=>{const n=nets(r),mn=Math.min(...n);return`<tr><td>${r.k=="c"?"🏎":"👤"} ${r.n}</td><td>${r.a}</td><td>${r.ovr}</td><td>${r.o?ownL(r.o):"— libero —"}</td><td>${mny(r.v)}</td><td><b>${rg(n)}</b></td><td><button class="mb" data-k="${r.k}" data-i="${r.i}" data-n="${r.k=="p"?r.n:""}"${r.lk?' disabled title="In trattativa"':left<=0?' disabled title="Limite di acquisti raggiunto"':mn>b?` disabled title="Budget insufficiente: mancano ${mny(mn-b)}"`:""}>${r.lk?"In trattativa":car?"Ordina":"Compra"}</button></td></tr>`}).join("")}</tbody></table></div>
   <p class="mut">Costo netto = valore del pezzo che prendi − valore di quello che cedi${CFG.MK_PREMIUM?` + ${Math.round(CFG.MK_PREMIUM*100)}% di supplemento se il venditore è un giocatore umano`:""}. Il pezzo che cedi passa al venditore (un pilota ceduto ai liberi torna libero); se vale di più del tuo, incassi la differenza. ${car?"I soldi si trattengono subito, il pezzo arriva alla finestra indicata e il venditore riceve una notifica. Per i piloti scegli tu chi cedere (il costo cambia). ":"Per i piloti scegli tu chi cedere (il costo cambia). "}Valore pilota: prezzo di listino ± punti OVR guadagnati o persi da inizio carriera.</p>`}
 function mkTrade(me,b,hs){const oth=hs.filter(q=>q!==me);if(!oth.length)return`<div class="warn">Gli scambi richiedono almeno 2 giocatori umani.</div>`;
  const T=MK.tr;if(!T.o||!oth.some(q=>q.id==T.o))T.o=oth[0].id;const ot=PL[T.o];
- const mine=[["c:"+me.t,`🏎 ${TEAMS[me.t][0]} (OVR ${TEAMS[me.t][1]})`],...me.d.map(x=>["d:"+x,`👤 ${DRV[x][0]} (OVR ${DRV[x][1]}, ${AGE[x]}a)`])].filter(m=>!lkS(m[0]));if(!mine.length)return`<div class="warn">Tutti i tuoi pezzi sono in trattativa: non puoi proporre scambi ora.</div>`;if(!mine.some(m=>m[0]==T.m))T.m=mine[0][0];
+ const mine=[["c:"+me.t,`🏎 ${TEAMS[me.t][0]} (OVR ${TEAMS[me.t][1]})`],...me.d.map(x=>["d:"+x,`👤 ${DRV[x][0]} (OVR ${DRV[x][1]}, ${AGE[x]}a)`])].filter(m=>!lkS(m[0])&&!(noCar()&&m[0][0]=="c"));if(!mine.length)return`<div class="warn">Tutti i tuoi pezzi sono in trattativa: non puoi proporre scambi ora.</div>`;if(!mine.some(m=>m[0]==T.m))T.m=mine[0][0];
  let theirs=T.m[0]=="c"?[["c:"+ot.t,`🏎 ${TEAMS[ot.t][0]} (OVR ${TEAMS[ot.t][1]})`]]:ot.d.map(x=>["d:"+x,`👤 ${DRV[x][0]} (OVR ${DRV[x][1]}, ${AGE[x]}a)`]);theirs=theirs.filter(m=>!lkS(m[0]));if(!theirs.length)return`<div class="warn">I pezzi richiesti sono in trattativa: scegli altro.</div>`;if(!theirs.some(m=>m[0]==T.t))T.t=theirs[0][0];
  const so=(a,v)=>a.map(([k,l])=>`<option value="${k}"${k==v?" selected":""}>${l}</option>`).join("");
  return`<div class="gar"><div class="row">Tu cedi <select id="trm">${so(mine,T.m)}</select></div><div class="row">A <select id="tro">${oth.map(q=>`<option value="${q.id}"${q.id==T.o?" selected":""}>G${q.id+1}</option>`).join("")}</select> in cambio di <select id="trt">${so(theirs,T.t)}</select></div>
@@ -1209,10 +1257,20 @@ function mkDo(me,k,i,slot,n){if(NET.client){toHost({t:"cmd",c:"buy",k,i,slot,n})
  if(NET.host&&q.o.id<NH()&&q.o.id!==me.id){const m="💸 "+buyMsg(me,k,i,q);if(q.o.id===0)note(m);else toPid(q.o.id,{t:"res",m})}
  note("✅ "+buyMsg(me,k,i,q));MK.pend=null;mkr()}
 function tradeDo(me){const P=MK.prop,o=PL[P.o],a=+P.m.slice(2),c=+P.t.slice(2);
- const valid=!lkS(P.m)&&!lkS(P.t)&&P.m[0]==P.t[0]&&(P.m[0]=="c"?me.t==a&&o.t==c:me.d.includes(a)&&o.d.includes(c))&&(P.cash<=0||G.bud[me.id]>=P.cash)&&(P.cash>=0||G.bud[o.id]>=-P.cash);
+ const valid=!lkS(P.m)&&!lkS(P.t)&&P.m[0]==P.t[0]&&!(noCar()&&P.m[0]=="c")&&(P.m[0]=="c"?me.t==a&&o.t==c:me.d.includes(a)&&o.d.includes(c))&&(P.cash<=0||G.bud[me.id]>=P.cash)&&(P.cash>=0||G.bud[o.id]>=-P.cash);
  if(!valid){note("Scambio non più valido","bad");MK.prop=null;return mkr()}
  if(P.m[0]=="c")[me.t,o.t]=[o.t,me.t];else{me.d[me.d.indexOf(a)]=c;o.d[o.d.indexOf(c)]=a}
  G.bud[me.id]-=P.cash;G.bud[o.id]+=P.cash;calcBonus(PL);updBud();saveCareer();note("✅ Scambio concluso");MK.prop=null;mkr()}
+
+/* ---------- HALVING DELLE MONOPOSTO (solo carriera) ---------- */
+// In carriera le monoposto non si comprano più: ogni HALVING_EVERY stagioni si calcola la media OVR di tutte le monoposto.
+// Chi sta sotto tira un dado grande quanto la distanza dalla media e SALE del numero uscito; chi sta sopra tira lo stesso dado e SCENDE; poi ogni monoposto tira un dado novità (1 = −3, 6 = +3). Media e dadi usano l'OVR totale, compresi i punti comprati col garage.
+const noCar=()=>G.mode=="career"&&!CFG.CAR_MARKET;
+const hvDue=()=>G.mode=="career"&&G.season%CFG.HALVING_EVERY==0;
+function doHalving(){const bs=TEAMS.map(t=>t[1]),avg=bs.reduce((s,v)=>s+v,0)/bs.length,ref=Math.round(avg),   // media e dadi usano l'OVR totale, punti comprati col garage compresi
+ rows=TEAMS.map((t,i)=>{const from=t[1],up=0,gap=ref-bs[i],die=Math.ceil(Math.abs(gap)/CFG.HALVING_DIV),roll=die?R(die):0,nv=R(6),sur=nv==1?-3:nv==6?3:0,   // dado novità: 1 = -3, 6 = +3 (evita che il campo si livelli del tutto)
+  to=Math.min(CFG.OVR_MAX,Math.max(1,bs[i]+Math.sign(gap)*roll+sur)+up);return{t:i,from,up,die,dir:Math.sign(gap),roll,nv,sur,to}});
+ rows.forEach(r=>TEAMS[r.t][1]=r.to);return{avg,ref,rows}}
 
 /* ---------- FINE STAGIONE (carriera) ---------- */
 // classifiche finali (stessi criteri di spareggio di renderChamp)
@@ -1221,12 +1279,13 @@ function stand(){const ct=cs=>{const x=Array(20).fill(0);cs.forEach(k=>(CH.ps[k]
  return{dr:[...DRV.keys()].sort((a,b)=>(CH.dp[dcode(b)]||0)-(CH.dp[dcode(a)]||0)||tie([dcode(a)],[dcode(b)])),
   co:[...PL].sort((a,b)=>CH.pp[b.id]-CH.pp[a.id]||tie(a.d.map(dcode),b.d.map(dcode)))}}
 function makeEnd(){const{dr,co}=stand(),prize={};co.forEach((p,i)=>{if(p.id<NH())prize[p.id]=CFG.SEASON_PRIZE[i]||0});
- return{step:0,dr,dpts:dr.map(i=>CH.dp[dcode(i)]||0),co:co.map(p=>p.id),cpts:co.map(p=>CH.pp[p.id]),prize,paid:0,evo:null,aged:0,pevo:null,ret:null,vac:[]}}
+ return{step:0,dr,dpts:dr.map(i=>CH.dp[dcode(i)]||0),co:co.map(p=>p.id),cpts:co.map(p=>CH.pp[p.id]),prize,paid:0,evo:null,aged:0,pevo:null,ret:null,vac:[],hv:null}}
 // evoluzione OVR in base a età (durante la stagione) e posizione nella classifica piloti
 function evolve(E){return E.dr.map((d,i)=>{const rank=i+1,age=AGE[d],grp=CFG.EVO.find(g=>age<=g.maxAge),rule=grp.rules.find(([a,z])=>rank>=a&&rank<=z),from=DRV[d][1],to=Math.min(CFG.OVR_MAX,Math.max(1,from+(rule?rule[2]:0)));DRV[d][1]=to;return{d,rank,age,from,to}})}
 function openEndSeason(){stop();S.wait=3;if(!G.end)G.end=makeEnd();saveCareer();showEnd()}
-const ESTEP=["Classifica piloti","Classifica costruttori","Premio costruttori","Evoluzione dei piloti","Età dei piloti","Ritiri e ricambi","Nuova stagione"];
-function showEnd(){const E=G.end,s=E.step,hu=id=>id<NH()?"me":"";let b="";
+const ESTEP=["Classifica piloti","Classifica costruttori","Premio costruttori","Evoluzione dei piloti","Età dei piloti","Ritiri e ricambi","Halving monoposto","Nuova stagione"];
+function showEnd(){const E=G.end;if(E.step==6){if(!E.hv)E.hv=hvDue()?doHalving():{skip:1};if(E.hv.skip)E.step=7;saveCareer()}   // halving: solo negli anni giusti, altrimenti il passo si salta
+ const s=E.step,hu=id=>id<NH()?"me":"";let b="";
  if(s==0)b=`<div class="w"><table><thead><tr><th>#</th><th>Pilota</th><th>Età</th><th>Scuderia</th><th>Giocatore</th><th>Punti</th></tr></thead><tbody>${E.dr.map((d,i)=>{const p=owD(d);return`<tr class="${hu(p.id)}"><td>${i+1}</td><td><span class="dot" style="background:${COL[p.t]}"></span>${DRV[d][0]}</td><td>${AGE[d]}</td><td>${TEAMS[p.t][0]}</td><td>${ownL(p)}</td><td><b>${E.dpts[i]}</b></td></tr>`}).join("")}</tbody></table></div>`;
  if(s==1)b=`<div class="w"><table><thead><tr><th>#</th><th>Scuderia (macchina)</th><th>Piloti</th><th>Giocatore</th><th>Punti</th></tr></thead><tbody>${E.co.map((id,i)=>{const p=PL[id];return`<tr class="${hu(id)}"><td>${i+1}</td><td><span class="dot" style="background:${COL[p.t]}"></span>${TEAMS[p.t][0]}</td><td>${p.d.map(x=>DRV[x][0]).join(" + ")}</td><td>${ownL(p)}</td><td><b>${E.cpts[i]}</b></td></tr>`}).join("")}</tbody></table></div>`;
  if(s==2){const hs=E.co.map((id,i)=>[id,i]).filter(([id])=>id<NH());b=hs.length?`<div class="w"><table><thead><tr><th>Giocatore</th><th>Posizione costruttori</th><th>Premio ricevuto</th><th>Budget ora</th></tr></thead><tbody>${hs.map(([id,i])=>`<tr class="me"><td>${ownL(PL[id])}</td><td>${i+1}°</td><td><b class="gn">+${mny(E.prize[id]||0)}</b></td><td>${mny(G.bud[id])}</td></tr>`).join("")}</tbody></table></div>`:`<p class="mut">Nessun giocatore umano: nessun premio da assegnare.</p>`}
@@ -1237,10 +1296,11 @@ function showEnd(){const E=G.end,s=E.step,hu=id=>id<NH()?"me":"";let b="";
   b=(rt.length?`<div class="w"><table><thead><tr><th>Pilota</th><th>Età</th><th>Squadra</th><th>Esito</th></tr></thead><tbody>${rt.map(r=>`<tr class="${r.ow>=0?hu(r.ow):""}"><td>${r.n}</td><td>${r.a}</td><td>${r.ow>=0?ownL(PL[r.ow]):"libero"}</td><td>${r.st=="stay"?"resta in sella (nessun sostituto libero)":r.rep?`si ritira → <b>${r.rep}</b>${r.bon?` · buonuscita <b class="gn">+${mny(r.bon)}</b>`:""}`:r.ow<0?"si ritira":"⏳ sostituto da scegliere"}</td></tr>`).join("")}</tbody></table></div>`:`<p class="mut">Nessun ritiro quest'anno.</p>`)
    +(E.vac||[]).map((v,vi)=>mineV(v)?`<div class="warn"><b>${ownL(PL[v.ow])}</b>: ${v.n} si ritira${v.bon?` (buonuscita ${mny(v.bon)})`:""}. Scegli il sostituto tra i piloti liberi — budget ${mny(G.bud[v.ow])}:<br>${avail.slice(0,14).map(p=>`<button class="vp" data-v="${vi}" data-n="${p.n}"${poolVal(p)>G.bud[v.ow]+(v.bon||0)?" disabled":""}>${p.n} · OVR ${p.o} · ${p.a}a · ${mny(poolVal(p))}</button>`).join(" ")}<br><button class="p vp" data-v="${vi}" data-n="">Assegna in automatico</button></div>`:"").join("")
    +(POOL.length<15?`<p class="mut">Piloti liberi rimasti: ${POOL.length}.</p>`:"")}
- if(s==6)b=`<p>La stagione ${G.season} è finita. Prima di partire puoi potenziare la monoposto o passare dal mercato: gli ordini fatti adesso arrivano <b>prima della gara 1</b>.</p><div class="sum">${PL.filter(p=>p.id<NH()).map(p=>`<span>G${p.id+1}: 💰 <b>${mny(G.bud[p.id])}</b> · ${TEAMS[p.t][0]} OVR ${TEAMS[p.t][1]}</span>`).join("")}</div><div class="mm"><button id="egar">🔧 Garage / Potenzia monoposto</button><button id="emk">🔁 Mercato</button><button class="p" id="ego">▶ Avvia la stagione ${G.season+1}</button></div>`;
- ovm(`<h3>🏁 FINE STAGIONE ${G.season}</h3><div class="mut">Passo ${s+1}/${ESTEP.length}: <b>${ESTEP[s]}</b></div>${s==0?`<p><b>🏆 Campione piloti: ${DRV[E.dr[0]][0]} (${E.dpts[0]} pt) · Campione costruttori: ${TEAMS[PL[E.co[0]].t][0]}, G${E.co[0]+1} (${E.cpts[0]} pt)</b></p>`:""}${b}${s<6?`<button class="p" id="een"${s==5&&(E.vac||[]).some(v=>!v.done)?" disabled":""}>Avanti ▸</button>`:""}`);
+ if(s==6){const H=E.hv;b=`<p>Ogni <b>${CFG.HALVING_EVERY} stagioni</b> le monoposto si riavvicinano alla media. Media OVR di tutte le monoposto (punti comprati compresi): <b>${fm(H.avg)}</b> (si usa <b>${H.ref}</b>). Chi sta <b>sotto</b> tira un dado grande quanto la distanza dalla media e <b class="gn">sale</b> del numero uscito; chi sta <b>sopra</b> tira lo stesso dado e <b class="ls">scende</b>. Poi ogni monoposto tira un <b>dado novità</b> (d6: 1 = −3, 6 = +3). Anche i punti comprati col garage contano.</p><div class="w"><table><thead><tr><th>Monoposto</th><th>Giocatore</th><th>OVR</th><th>Dado</th><th>Uscito</th><th>Novità</th><th>Nuovo OVR</th></tr></thead><tbody>${[...H.rows].sort((x,y)=>y.from-x.from).map(r=>{const p=owC(r.t),dl=r.to-r.from;return`<tr class="${p?hu(p.id):""}"><td><span class="dot" style="background:${COL[r.t]}"></span>${TEAMS[r.t][0]}</td><td>${p?ownL(p):"–"}</td><td>${r.from}${r.up?` <span class="mut">(+${r.up} upgrade)</span>`:""}</td><td>${r.die?"d"+r.die+(r.dir>0?" +":" −"):"—"}</td><td><b>${r.die?r.roll:"–"}</b></td><td>${r.nv} ${r.sur>0?"▲ +3":r.sur<0?"▼ −3":"–"}</td><td class="${dl>0?"gn":dl<0?"ls":""}">${r.from} → <b>${r.to}</b>${dl>0?" ▲ +"+dl:dl<0?" ▼ "+dl:" = invariato"}</td></tr>`}).join("")}</tbody></table></div>`}
+ if(s==7)b=`<p>La stagione ${G.season} è finita. Prima di partire puoi potenziare la monoposto o passare dal mercato: gli ordini fatti adesso arrivano <b>prima della gara 1</b>.</p><div class="sum">${PL.filter(p=>p.id<NH()).map(p=>`<span>G${p.id+1}: 💰 <b>${mny(G.bud[p.id])}</b> · ${TEAMS[p.t][0]} OVR ${TEAMS[p.t][1]}</span>`).join("")}</div><div class="mm"><button id="egar">🔧 Garage / Potenzia monoposto</button><button id="emk">🔁 Mercato</button><button class="p" id="ego">▶ Avvia la stagione ${G.season+1}</button></div>`;
+ ovm(`<h3>🏁 FINE STAGIONE ${G.season}</h3><div class="mut">Passo ${s+1}/${ESTEP.length}: <b>${ESTEP[s]}</b></div>${s==0?`<p><b>🏆 Campione piloti: ${DRV[E.dr[0]][0]} (${E.dpts[0]} pt) · Campione costruttori: ${TEAMS[PL[E.co[0]].t][0]}, G${E.co[0]+1} (${E.cpts[0]} pt)</b></p>`:""}${b}${s<7?`<button class="p" id="een"${s==5&&(E.vac||[]).some(v=>!v.done)?" disabled":""}>Avanti ▸</button>`:""}`);
  if(s==5)document.querySelectorAll(".vp").forEach(e=>e.onclick=()=>{const v=E.vac[+e.dataset.v],err=e.dataset.n?vacPick(E,v,e.dataset.n):vacAuto(E,v);if(err)note(err,"bad");saveCareer();updBud();showEnd()});
- if(s<6)$("een").onclick=()=>{ // ogni passo applica il proprio effetto una sola volta e salva
+ if(s<7)$("een").onclick=()=>{ // ogni passo applica il proprio effetto una sola volta e salva
   if(s==1&&!E.paid){Object.entries(E.prize).forEach(([id,a])=>G.bud[+id]+=a);E.paid=1}
   else if(s==2&&!E.evo){E.evo=evolve(E);E.pevo=evolvePool()}
   else if(s==3&&!E.aged){AGE=AGE.map(a=>a+1);POOL.forEach(p=>p.a++);E.aged=1}
@@ -1342,8 +1402,8 @@ function onlineGo(){if(!NET.need)return;const need=NET.need;NET.need=null;clearT
 function applyIntent(pid,it){const cs=live().filter(c=>c.pi==pid);if(it&&typeof it.ro!=="undefined"&&S.pl[pid])S.pl[pid].rcOff=it.ro?1:0;
  cs.forEach(c=>{const v=it&&it.cars&&it.cars[c.code];if(!v)return;
   if(S.round==1&&Array.isArray(v.pl)&&v.pl.length&&v.pl.length<=3&&v.pl.every(t=>"SMH".includes(t)&&t)&&Array.isArray(v.pls)){c.pl=v.pl.slice();c.pls=v.pls.map(Number).slice(0,2);c.si=0;c.tyre=c.pl[0]}
-  c.lm=[-1,0,1].includes(v.lm)?v.lm:0;if(Number.isInteger(v.lmLap))c.lmLap=v.lmLap;c.lmSet=0;c.wl=[0,1,2].includes(v.wl)?v.wl:null;c.hp=v.hp?1:0;
-  if(v.nxs&&"SMH".includes(v.nxs))c.nxs=v.nxs;c.dnum=Math.max(0,Math.min(6,+v.dn||0))});
+  c.lm=[-1,0,1].includes(v.lm)?v.lm:0;if(Number.isInteger(v.lmLap))c.lmLap=v.lmLap;c.lmSet=0;c.wl=[0,1,2].includes(v.wl)?v.wl:null;if(S.rfAt!==S.round)c.hp=v.hp?1:0;
+  if(S.rfAt!==S.round&&v.nxs&&"SMH".includes(v.nxs))c.nxs=v.nxs;c.dnum=Math.max(0,Math.min(6,+v.dn||0))});
  const k=it&&it.card&&it.card.k;
  if(k){const p=S.pl[pid],m=cs.filter(c=>!c.pit).sort((a,b)=>b.dist-a.dist),x=S.cars.find(c=>c.code==it.card.code&&c.pi==pid);p.spt=Number.isInteger(it.card.tg)?it.card.tg:null;
   if(p.hand.includes(k)&&m.length&&useAny(p,k,m,x)){p.hand.splice(p.hand.indexOf(k),1);RE.includes(k)&&S.disc.push(k)}
@@ -1376,16 +1436,17 @@ function camClient(items){$("turn").hidden=false;$("bc").hidden=true;$("who").te
  document.querySelectorAll(".cb2").forEach(b=>b.onclick=()=>send(+b.dataset.i));$("cn2").onclick=()=>send(-1)}
 
 /* ---------- comandi garage / mercato (client → host) ---------- */
-function doUp(p){const t=p.t,c=upCost(TEAMS[t][1]);if(c==null||G.bud[p.id]<c)return"Potenziamento non possibile";G.bud[p.id]-=c;TUP[t]+=c;TEAMS[t][1]++;updBud();saveCareer();return""}
+function doUp(p){const t=p.t,c=upCost(TEAMS[t][1]);if(c==null||G.bud[p.id]<c)return"Potenziamento non possibile";G.bud[p.id]-=c;TUP[t]+=c;TUPP[t]=(TUPP[t]||0)+1;TEAMS[t][1]++;updBud();saveCareer();return""}
 function doBuy(me,k,i,slot,n){if(G.mode=="career"){const r=orderCore(me,k,i,slot,n);if(typeof r=="string")return r;if(me.id===0)note("✅ "+r.msg);else toPid(me.id,{t:"res",m:"✅ "+r.msg});return""}
  const q=buyCore(me,k,i,slot);if(typeof q=="string")return q;
  if(q.o.id<NH()&&q.o.id!==me.id){const m="💸 "+buyMsg(me,k,i,q);if(q.o.id===0)note(m);else toPid(q.o.id,{t:"res",m})}return""}
 function doTrade(a,o,m,t,cash){const x=+m.slice(2),y=+t.slice(2);
- const valid=!lkS(m)&&!lkS(t)&&m[0]==t[0]&&(m[0]=="c"?a.t==x&&o.t==y:a.d.includes(x)&&o.d.includes(y))&&(cash<=0||G.bud[a.id]>=cash)&&(cash>=0||G.bud[o.id]>=-cash);
+ const valid=!lkS(m)&&!lkS(t)&&m[0]==t[0]&&!(noCar()&&m[0]=="c")&&(m[0]=="c"?a.t==x&&o.t==y:a.d.includes(x)&&o.d.includes(y))&&(cash<=0||G.bud[a.id]>=cash)&&(cash>=0||G.bud[o.id]>=-cash);
  if(!valid)return"Scambio non più valido";if(m[0]=="c")[a.t,o.t]=[o.t,a.t];else{a.d[a.d.indexOf(x)]=y;o.d[o.d.indexOf(y)]=x}
  G.bud[a.id]-=cash;G.bud[o.id]+=cash;calcBonus(PL);updBud();saveCareer();return""}
 function onCmd(pid,m){const p=PL[pid];if(!p||pid>=NH())return;let err="";
- if(raceOn()&&!(G.mode=="career"&&(m.c=="buy"||m.c=="mcx")))err="Non disponibile durante la gara";
+ if(raceOn()&&m.c!="rfp"&&!(G.mode=="career"&&(m.c=="buy"||m.c=="mcx")))err="Non disponibile durante la gara";
+ else if(m.c=="rfp")rfPick(pid,m.p);
  else if(m.c=="up")err=doUp(p);
  else if(m.c=="buy")err=doBuy(p,m.k,+m.i,+m.slot,m.n);
  else if(m.c=="mcx")err=doCancel(p,+m.id);
@@ -1449,6 +1510,7 @@ function cliRecv(d){const m=parse(d);if(!m)return;
   case"res":note(m.m,m.bad?"bad":"good");break;
   case"toast":note(m.m,m.k);break;
   case"spy":ov(m.html,1);break;
+  case"rf":rfShow(ME,m.d,pk=>toHost({t:"cmd",c:"rfp",p:pk}));break;
   case"tprop":tradePrompt(m.pr);break}}
 function cliStart(m){ME=m.pid;NET.started=true;NET.names=m.names;NET.secs=m.secs;G.mode=m.mode;G.dtype=m.dtype;$("nh").value=String(m.names.length);
  document.body.classList.add("onl","cl");lockUI();$("rm").textContent="🌐 "+NET.code;
